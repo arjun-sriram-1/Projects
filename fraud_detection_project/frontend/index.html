@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>💳 Fraud Detection Dashboard</h1>
+
+    <!-- INPUT CARD -->
+    <div class="card">
+        <h2>Check Transaction</h2>
+
+        <input type="number" id="amount" placeholder="Amount">
+        <input type="number" id="oldbalance" placeholder="Old Balance">
+        <input type="number" id="newbalance" placeholder="New Balance">
+
+        <button onclick="predict()">Check Fraud</button>
+
+        <h3 id="result"></h3>
+    </div>
+
+    <!-- STATS CARD -->
+    <div class="card">
+        <h2>📊 Statistics</h2>
+
+        <div class="stats-box">
+            <div>
+                <h3>Total</h3>
+                <p id="total">0</p>
+            </div>
+            <div>
+                <h3>Fraud</h3>
+                <p id="fraud">0</p>
+            </div>
+            <div>
+                <h3>Legit</h3>
+                <p id="legit">0</p>
+            </div>
+            <div>
+                <h3>Fraud %</h3>
+                <p id="rate">0%</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <!-- TOP FRAUD -->
+    <div class="card">
+        <h2>⚠️ Top Risky Transactions</h2>
+        <table id="topTable">
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Old</th>
+                <th>New</th>
+            </tr>
+        </table>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+        <h2>📜 Transaction History</h2>
+        <table id="historyTable">
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Old</th>
+                <th>New</th>
+                <th>Status</th>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
