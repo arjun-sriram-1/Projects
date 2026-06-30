@@ -1,0 +1,11 @@
+{
+  "base_correlation": 0.06364065614689896,
+  "stress_coefficient": 0.048196501699843707,
+  "vix_stress_coefficient": 0.005,
+  "min_correlation": 0.03,
+  "max_correlation": 0.55,
+  "calibration_method": "temporal_default_label_clustering",
+  "rows": 157029,
+  "years": 11,
+  "label_source_note": "Uses current PD training labels, which may include free-source proxy distress labels."
+}

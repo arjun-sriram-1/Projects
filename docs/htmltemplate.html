@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskIntel - Trade Finance Credit Risk Terminal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #090d16;       /* Deepest Navy/Black */
+            --bg-secondary: #111827;     /* Muted Panel Slate */
+            --bg-surface: #1f2937;       /* Compact Card Background */
+            --text-main: #f9fafb;        /* Crisp White Text */
+            --text-muted: #9ca3af;       /* Secondary Text Slate */
+            --accent: #38bdf8;           /* Clean Blue Info/Accent */
+            --accent-hover: #0ea5e9;
+            --border-color: #374151;     /* Fine Borders */
+            --danger: #ef4444;           /* Red High-Risk Flags */
+            --success: #10b981;          /* Green Safe Signals */
+            --warning: #f59e0b;          /* Amber Warnings */
+            --copilot-width: 400px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* --- UPGRADED TOP CONTROLLER STRIP --- */
+        .header-strip { 
+            background-color: var(--bg-secondary); 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 24px; 
+            height: 75px; 
+            min-height: 75px; 
+            z-index: 50;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; position: relative; }
+        .brand { font-size: 1.15rem; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .divider { width: 1px; height: 28px; background-color: var(--border-color); }
+        
+        /* --- SEARCH + SELECT COUNTERPARTY DROPDOWN COMPONENT --- */
+        .searchable-select-container { position: relative; width: 280px; }
+        .select-trigger { background-color: var(--bg-surface); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--text-main); }
+        .select-trigger i { color: var(--text-muted); font-size: 0.75rem; }
+        .select-dropdown-box { display: none; position: absolute; top: calc(100% + 5px); left: 0; width: 100%; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); z-index: 100; padding: 6px; }
+        .search-input-wrapper { display: flex; align-items: center; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; margin-bottom: 6px; }
+        .search-input-wrapper input { background: none; border: none; color: var(--text-main); font-size: 0.8rem; width: 100%; outline: none; padding: 4px; }
+        .search-input-wrapper i { color: var(--text-muted); font-size: 0.8rem; }
+        .dropdown-options-list { max-height: 180px; overflow-y: auto; list-style: none; }
+        .dropdown-option { padding: 8px; font-size: 0.8rem; color: var(--text-muted); border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+        .dropdown-option:hover { background-color: var(--bg-surface); color: var(--text-main); }
+        .dropdown-option strong { color: var(--text-main); }
+
+        /* --- HEADER METADATA CARDS --- */
+        .header-meta-summary { display: flex; gap: 16px; font-size: 0.8rem; color: var(--text-muted); margin-left: 10px; }
+        .meta-pill { background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; }
+        .meta-pill strong { color: var(--text-main); }
+
+        /* --- BUTTON CONTROLS --- */
+        .btn { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.15s; font-size: 0.85rem; }
+        .btn-primary { background-color: var(--accent); color: var(--bg-primary); }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .btn-secondary { background-color: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: var(--border-color); }
+        .btn-submit { background-color: var(--success); color: var(--bg-primary); padding: 12px; width: 100%; justify-content: center; margin-top: 15px; }
+
+        /* --- TERMINAL CORE WINDOW SYSTEM --- */
+        .terminal-body { display: flex; flex-grow: 1; height: calc(100vh - 75px); overflow: hidden; }
+        
+        /* --- SIDEBAR NAVIGATION BAR --- */
+        .sidebar-nav { width: 250px; min-width: 250px; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 8px; gap: 4px; }
+        .nav-heading { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); padding: 8px; letter-spacing: 1px; font-weight: 700; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px; border-radius: 6px; color: var(--text-muted); background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s ease; }
+        .nav-item:hover { color: var(--text-main); background-color: var(--bg-surface); }
+        .nav-item.active { color: var(--text-main); background-color: var(--bg-surface); border-left: 3px solid var(--accent); font-weight: 600; }
+
+        /* --- CENTRAL DASHBOARD WORKSPACE CANVAS --- */
+        .main-viewport { flex-grow: 1; padding: 24px; overflow-y: auto; background-color: var(--bg-primary); }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.15s ease-out; }
+        .page-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; color: var(--text-main); }
+        .page-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- COMPACT CARDS & PANEL LAYOUTS --- */
+        .kpi-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        .kpi-card { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; }
+        .kpi-card .title { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+        .kpi-card .value { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
+        
+        .layout-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .layout-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .panel { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; }
+        .panel-title { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 12px; }
+
+        /* --- SYSTEM TABLES --- */
+        .compact-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+        .compact-table th { color: var(--text-muted); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--border-color); background-color: rgba(255,255,255,0.01); }
+        .compact-table td { padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); }
+        .compact-table tr:hover td { background-color: rgba(255,255,255,0.01); }
+
+        /* --- BADGES & ALERTS --- */
+        .badge { display: inline-block; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-radius: 4px; }
+        .badge-danger { background-color: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+        .badge-warning { background-color: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .badge-success { background-color: rgba(16,185,129,0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+        
+        .warning-box { background-color: rgba(245,158,11,0.03); border: 1px dashed var(--warning); border-radius: 6px; padding: 12px; font-size: 0.8rem; color: var(--warning); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .risk-driver-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.8rem; }
+        .bar-container { background-color: var(--bg-surface); width: 100px; height: 6px; border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; background-color: var(--accent); }
+
+        /* --- FIXED PERSISTENT AI COPILOT SIDEBAR --- */
+        .persistent-copilot { width: var(--copilot-width); min-width: var(--copilot-width); background-color: var(--bg-secondary); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100%; }
+        .copilot-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: rgba(0,0,0,0.1); }
+        .chat-area { flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .bubble { padding: 10px 12px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; max-width: 85%; }
+        .bubble-system { background-color: var(--bg-surface); color: var(--text-main); align-self: flex-start; border-left: 3px solid var(--accent); }
+        .bubble-user { background-color: var(--accent); color: var(--bg-primary); align-self: flex-end; font-weight: 600; }
+        
+        .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 16px 10px 16px; }
+        .btn-preset { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px; font-size: 0.75rem; text-align: left; color: var(--text-muted); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn-preset:hover { color: var(--text-main); border-color: var(--accent); }
+        
+        .chat-input-wrapper { padding: 12px 16px; border-top: 1px solid var(--border-color); background-color: rgba(0,0,0,0.1); display: flex; gap: 8px; }
+        .chat-input-wrapper input { flex-grow: 1; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; color: var(--text-main); outline: none; font-size: 0.85rem; }
+        .chat-input-wrapper button { background-color: var(--accent); border: none; width: 36px; height: 36px; border-radius: 4px; color: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* --- DATA INGESTION POPUP MODAL --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000; }
+        .modal-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); width: 640px; border-radius: 8px; overflow: hidden; animation: fadeIn 0.12s ease-out; }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: #111c30; }
+        .modal-body { padding: 20px; }
+        .ingest-tabs { display: flex; gap: 6px; margin-bottom: 16px; background-color: #111c30; padding: 4px; border-radius: 6px; }
+        .ingest-tab-btn { flex:1; padding: 8px; background:none; border:none; color: var(--text-muted); cursor:pointer; font-weight:600; border-radius:4px; font-size:0.8rem; }
+        .ingest-tab-btn.active { background-color: var(--accent); color: var(--bg-primary); }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; background-color: var(--bg-surface); border: 1px solid var(--border-color); padding: 8px 10px; border-radius: 6px; color: var(--text-main); outline: none; font-size: 0.85rem; }
+        .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .file-drop-zone { border: 2px dashed var(--border-color); padding: 30px 15px; text-align: center; border-radius: 6px; cursor: pointer; }
+        .file-drop-zone:hover { border-color: var(--accent); background: rgba(56,189,248,0.01); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="header-strip">
+        <div class="header-left">
+            <div class="brand"><i class="fa-solid fa-terminal"></i> RiskIntel Agent</div>
+            <div class="divider"></div>
+            
+            <div class="searchable-select-container">
+                <div class="select-trigger" id="active-select-trigger" onclick="toggleSearchDropdown()">
+                    <span id="selected-name-display">Skyways Airlines Global</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="select-dropdown-box" id="search-dropdown-wrapper">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="selector-search-box" placeholder="Search counterparties..." onkeyup="filterCounterparties()">
+                    </div>
+                    <ul class="dropdown-options-list" id="dropdown-options-container">
+                        <li class="dropdown-option" onclick="selectCounterparty('skyways')">
+                            <strong>Skyways Airlines Global</strong><span style="font-size:0.7rem; color:var(--text-muted)">Airline | United States</span>
+                        </li>
+                        <li class="dropdown-option" onclick="selectCounterparty('oceanic')">
+                            <strong>Oceanic Logistics Group</strong><span style="font-size:0.7rem; color:var(--text-muted)">Shipowner | Greece</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="header-meta-summary">
+                <div class="meta-pill">Segment: <strong id="head-segment">Airline (Jet Fuel)</strong></div>
+                <div class="meta-pill">Country: <strong id="head-country">United States</strong></div>
+                <div class="meta-pill">Requested Limit: <strong id="head-requested">$10.0M</strong></div>
+            </div>
+        </div>
+        
+        <div>
+            <button class="btn btn-primary" onclick="openIngestModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Ingest New Data</button>
+        </div>
+    </header>
+
+    <div class="terminal-body">
+        
+        <aside class="sidebar-nav">
+            <div class="nav-heading">Risk Framework</div>
+            <button class="nav-item active" onclick="navigateTerminal(event, 'counterparty-analysis')"><i class="fa-solid fa-address-card"></i> 1. Counterparty Analysis</button>
+            <button class="nav-item" onclick="navigateTerminal(event, 'financial-statements')"><i class="fa-solid fa-file-invoice-dollar"></i> 2. Financial Statements</button>
+            <button class="nav-item" onclick="navigateTerminal(event, 'market-stress')"><i class="fa-solid fa-chart-line"></i> 3. Market & Stress Intel</button>
+            <button class="nav-item" onclick="navigateTerminal(event, 'scenario-forecast')"><i class="fa-solid fa-wand-magic-sparkles"></i> 4. Scenario & Forecasts</button>
+            <button class="nav-item" onclick="navigateTerminal(event, 'quant-montecarlo')"><i class="fa-solid fa-calculator"></i> 5. Quant & Monte Carlo</button>
+            <button class="nav-item" onclick="navigateTerminal(event, 'credit-recommendation')"><i class="fa-solid fa-gavel"></i> 6. Credit Recommendation</button>
+            <button class="nav-item" style="color: #f43f5e;" onclick="navigateTerminal(event, 'ai-credit-analyst')"><i class="fa-solid fa-user-shield"></i> 7. AI Credit Analyst</button>
+        </aside>
+
+        <main class="main-viewport">
+            
+            <section id="counterparty-analysis" class="page-content active">
+                <h1 class="page-title">Counterparty Credit Analysis</h1>
+                <div class="page-subtitle">Question Answered: Is this customer safe to sell fuel to on credit?</div>
+                
+                <div class="kpi-strip">
+                    <div class="kpi-card"><div class="title">Merton/ML PD</div><div class="value" id="kpi-pd">8.8%</div></div>
+                    <div class="kpi-card"><div class="title">Predicted LGD</div><div class="value" id="kpi-lgd">52%</div></div>
+                    <div class="kpi-card"><div class="title">Calculated EAD</div><div class="value" id="kpi-ead">$12.4M</div></div>
+                    <div class="kpi-card"><div class="title">Expected Loss</div><div class="value" id="kpi-el" style="color: var(--warning);">$566K</div></div>
+                    <div class="kpi-card"><div class="title">Risk Grade</div><div class="value" id="kpi-grade" style="color: var(--danger);">BB</div></div>
+                    <div class="kpi-card"><div class="title">Recommended Terms</div><div class="value" id="kpi-terms" style="color: var(--accent); font-size: 1.1rem;">$8M / 30d / LC</div></div>
+                </div>
+
+                <div class="layout-grid-3">
+                    <div class="panel">
+                        <div class="panel-title">Accounting Brief Summary</div>
+                        <table class="compact-table">
+                            <tr><td>Stated Revenue</td><td style="text-align: right; font-weight:600;" id="s-rev">$1,200M</td></tr>
+                            <tr><td>Extracted EBITDA</td><td style="text-align: right; font-weight:600;" id="s-ebitda">$140M</td></tr>
+                            <tr><td>Total Debt Profile</td><td style="text-align: right; font-weight:600;" id="s-debt">$650M</td></tr>
+                            <tr><td>Liquid Cash</td><td style="text-align: right; font-weight:600;" id="s-cash">$90M</td></tr>
+                        </table>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">Risk Driver Index Weights</div>
+                        <div class="risk-driver-bar"><span>Fuel Cost Sensitivity</span><div class="bar-container"><div class="bar-fill" id="b-fuel" style="width: 90%; background-color: var(--danger)"></div></div></div>
+                        <div class="risk-driver-bar"><span>Leverage Risk Profile</span><div class="bar-container"><div class="bar-fill" id="b-lev" style="width: 75%; background-color: var(--warning)"></div></div></div>
+                        <div class="risk-driver-bar"><span>Macro Stress Factor</span><div class="bar-container"><div class="bar-fill" style="width: 60%;"></div></div></div>
+                        <div class="risk-driver-bar"><span>FX Valuation Drag</span><div class="bar-container"><div class="bar-fill" style="width: 45%;"></div></div></div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">Credit Underwriting Status</div>
+                        <div style="margin-bottom: 12px;"><span class="badge badge-warning" id="s-verdict">Conditional Approval Mandate</span></div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;" id="s-rationale">
+                            Limit restricted due to elevated baseline leverage footprints. Strict Standby LC guidelines required for fuel trade asset security.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="financial-statements" class="page-content">
+                <h1 class="page-title">Extracted Financial Statements & Ratio Engine</h1>
+                <div class="page-subtitle">Question Answered: Can the counterparty repay based on financial strength?</div>
+                
+                <div class="warning-box" id="audit-confidence-box">
+                    <i class="fa-solid fa-circle-check" style="color:var(--success)"></i>
+                    <div>Data Lineage Audit: Ingested verification pipeline score matches <strong id="audit-score">94% Confidence</strong>. Reference Source: System Default SEC Catalog.</div>
+                </div>
+
+                <div class="layout-grid-2">
+                    <div class="panel">
+                        <div class="panel-title">Extracted Accounting Line Items</div>
+                        <table class="compact-table">
+                            <thead><tr><th>Accounting Field Identifier</th><th style="text-align: right;">Stated Value</th></tr></thead>
+                            <tbody>
+                                <tr><td>Stated Revenue</td><td style="text-align: right; font-weight:600;" id="f-rev">$1,200.0M</td></tr>
+                                <tr><td>EBITDA Valuation</td><td style="text-align: right; font-weight:600;" id="f-ebitda">$140.0M</td></tr>
+                                <tr><td>EBIT Run-Rate</td><td style="text-align: right; font-weight:600;" id="f-ebit">$82.0M</td></tr>
+                                <tr><td>Net Income Extraction</td><td style="text-align: right; font-weight:600;" id="f-net">$32.0M</td></tr>
+                                <tr><td>Liquid Cash Assets</td><td style="text-align: right; font-weight:600;" id="f-cash">$90.0M</td></tr>
+                                <tr><td>Total Asset Base</td><td style="text-align: right; font-weight:600;" id="f-assets">$850.0M</td></tr>
+                                <tr><td>Consolidated Total Debt</td><td style="text-align: right; font-weight:600;" id="f-debt">$650.0M</td></tr>
+                                <tr><td>Shareholder Equity Cushion</td><td style="text-align: right; font-weight:600;" id="f-equity">$200.0M</td></tr>
+                                <tr><td>Current Liabilities</td><td style="text-align: right; font-weight:600;" id="f-liab">$210.0M</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="panel">
+                        <div class="panel-title">Calculated Analytical Financial Ratios</div>
+                        <table class="compact-table">
+                            <thead><tr><th>Ratio Metrics Class</th><th>Computed Value</th><th>Policy Threshold Flag</th></tr></thead>
+                            <tbody>
+                                <tr><td>Current Ratio</td><td id="r-curr">1.15x</td><td><span class="badge badge-warning" id="rf-curr">Compressed Pool</span></td></tr>
+                                <tr><td>Debt / EBITDA Multiple</td><td id="r-debtebitda">4.64x</td><td><span class="badge badge-danger" id="rf-debtebitda">Elevated Leverage</span></td></tr>
+                                <tr><td>Debt / Equity Solvency</td><td id="r-debteq">3.25x</td><td><span class="badge badge-danger" id="rf-debteq">Solenoid Warning</span></td></tr>
+                                <tr><td>Operating Margin %</td><td id="r-margin">6.83%</td><td><span class="badge badge-warning" id="rf-margin">Thin Cushion</span></td></tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.75rem; color: var(--accent);">
+                            // Quantitative Ratio Rule Engine Trace Active<br>
+                            Solvency Buffer = (Equity / Total Asset Value Proxy)<br>
+                            Status Update Log: Ratios recalculate directly on top context changes.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="market-stress" class="page-content">
+                <h1 class="page-title">Market Intelligence & Systematic Stress Matrix</h1>
+                <div class="page-subtitle">Question Answered: What external market and macro stress risks matter right now?</div>
+                <div class="layout-grid-3">
+                    <div class="panel" style="text-align: center;"><div class="panel-title">System Stress Index</div><div style="font-size: 2.8rem; font-weight: 800; color: var(--warning); margin: 10px 0;">64</div><div><span class="badge badge-warning">ELEVATED PRESSURE</span></div></div>
+                    <div class="panel"><div class="panel-title">Active Volatility Regime</div><div style="font-size: 1.15rem; font-weight: bold; color: var(--danger); margin-bottom: 8px;"><i class="fa-solid fa-gas-pump"></i> Commodity Stress</div><p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">Energy volatility vectors expand macro strictness models.</p></div>
+                    <div class="panel"><div class="panel-title">PCA Volatility Weights</div><div class="risk-driver-bar"><span>Refined Oil Cracks</span><div class="bar-container"><div class="bar-fill" style="width: 55%; background-color: var(--danger)"></div></div></div><div class="risk-driver-bar"><span>VIX Index Change</span><div class="bar-container"><div class="bar-fill" style="width: 20%; background-color: var(--warning)"></div></div></div></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">Indicator Pricing Reference Grid</div>
+                    <table class="compact-table">
+                        <thead><tr><th>Factor Symbol</th><th>Spot Value</th><th>1M Delta</th><th>Risk Signal Interpretation</th></tr></thead>
+                        <tbody>
+                            <tr><td>Brent Crude Futures</td><td>$84.50</td><td>+12.4%</td><td><span class="badge badge-danger">Severe Cost Pressure</span></td></tr>
+                            <tr><td>Jet Fuel Index Proxy</td><td>$112.10</td><td>+14.8%</td><td><span class="badge badge-danger">Airline Margin Threat</span></td></tr>
+                            <tr><td>VIX Fear Index</td><td>21.40</td><td>+8.5%</td><td><span class="badge badge-warning">Funding Stress Expanding</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="scenario-forecast" class="page-content">
+                <h1 class="page-title">Data-Driven Quantile Scenario Matrix</h1>
+                <div class="page-subtitle">Question Answered: How does risk change under normal, adverse, and severe market paths?</div>
+                <div class="panel">
+                    <table class="compact-table">
+                        <thead><tr><th>Simulation Path</th><th>Brent</th><th>DXY</th><th>VIX</th><th>Stressed PD</th><th>Stressed LGD</th><th>Expected Loss</th><th>Target Limit</th><th>Tenor</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Base Case (Median)</strong></td><td>+2%</td><td>+0.5%</td><td>+3%</td><td>5.2%</td><td>42%</td><td>$218K</td><td>$12M</td><td>45 Days</td></tr>
+                            <tr style="background-color: rgba(245,158,11,0.02);"><td><strong style="color:var(--warning)">Adverse Stress Path</strong></td><td>+14%</td><td>+5%</td><td>+30%</td><td>10.4%</td><td>50%</td><td>$520K</td><td>$7M</td><td>30 Days</td></tr>
+                            <tr style="background-color: rgba(239,68,68,0.02);"><td><strong style="color:var(--danger)">Severe Downside Path</strong></td><td>+25%</td><td>+8%</td><td>+50%</td><td>17.8%</td><td>58%</td><td>$1.03M</td><td>$4M</td><td>LC Only</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="quant-montecarlo" class="page-content">
+                <h1 class="page-title">Stochastic Model Convergence Workspace</h1>
+                <div class="page-subtitle">Question Answered: What do the models say, and what is the range of possible losses?</div>
+                <div class="kpi-strip">
+                    <div class="kpi-card"><div class="title">Structural Merton PD</div><div class="value">4.25%</div></div>
+                    <div class="kpi-card"><div class="title">ML Cross-Check PD</div><div class="value">5.12%</div></div>
+                    <div class="kpi-card"><div class="title">Calculated LGD Baseline</div><div class="value">52%</div></div>
+                    <div class="kpi-card"><div class="title">Expected Shortfall (95%)</div><div class="value" style="color: var(--danger);">$2.45M</div></div>
+                </div>
+                <div class="panel"><div class="panel-title">Simulated Percentile Destructive Floors</div><table class="compact-table"><tr><td>P50 Loss Horizon</td><td>$522,000</td></tr><tr><td>P95 VaR Boundary Marker</td><td>$1,820,000</td></tr><tr><td>P99 Catastrophic Shock Tail</td><td>$2,940,000</td></tr></table></div>
+            </section>
+
+            <section id="credit-recommendation" class="page-content">
+                <h1 class="page-title">Credit Committee Underwriting Authorization Board</h1>
+                <div class="page-subtitle">Question Answered: What should the supplier actually do?</div>
+                <div class="layout-grid-2">
+                    <div class="panel" style="border-left:4px solid var(--warning)"><div class="panel-title">Active Credit Underwriting Verdict Card</div><div style="font-size:1.5rem; font-weight:800; color:var(--warning); margin-bottom:10px;" id="u-verdict">Approve With Conditions</div><div style="font-size:0.85rem; line-height:2; color:var(--text-muted)">Recommended Limit: <span style="float:right; color:var(--text-main)" id="u-limit">$8.0M</span><br>Payment Tenor: <span style="float:right; color:var(--text-main)" id="u-tenor">30 Days</span><br>Security Instrument: <span style="float:right; color:var(--text-main)" id="u-security">Standby Letter of Credit</span><br>Risk Grade Assigned: <span style="float:right; color:var(--danger)" id="u-grade">BB</span></div></div>
+                    <div class="panel"><div class="panel-title">Committee Rationale Summary</div><p style="font-size:0.85rem; color:var(--text-muted); line-height:1.6;" id="u-rationale">The customer's elevated debt multiples prevent uncollateralized credit extension. Imposing strict Standby LC structures mitigates the baseline exposure profiles.</p></div>
+                </div>
+            </section>
+
+            <section id="ai-credit-analyst" class="page-content">
+                <h1 class="page-title">AI Agentic Credit Memo Generation Interface</h1>
+                <div class="page-subtitle">Question Answered: Why did the system recommend this decision?</div>
+                <div class="panel">
+                    <div class="panel-title">Automated Grounded Credit Memo Output Console</div>
+                    <div style="background-color:rgba(0,0,0,0.2); border:1px solid var(--border-color); padding:15px; font-family:monospace; font-size:0.8rem; color:var(--text-muted); line-height:1.6; height:250px; overflow-y:auto;" id="memo-box">
+                        [EXECUTIVE CREDIT RISK MEMORANDUM AUTOMATION DETECTED]<br>
+                        TARGET COUNTERPARTY OBJECT DESIGNATION: SKYWAYS AIRLINES GLOBAL<br><br>
+                        Financial statement models show high debt concentrations. Interest service metrics are restricted under current volatility pricing regimes. Recommended credit ceiling capped at $8.0M with Standby Letter of Credit protection mandates. All assertions are grounded in computational logs.
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <aside class="persistent-copilot">
+            <div class="copilot-header">
+                <div style="display:flex; align-items:center; gap:8px; font-weight:bold; color:#f43f5e;"><i class="fa-solid fa-robot"></i> <span>Live Credit Co-Pilot</span></div>
+            </div>
+            <div class="chat-area" id="copilot-chat-box">
+                <div class="bubble bubble-system">
+                    Holding real-time context on metrics across all navigation views. I monitor financial statements, Merton models, and scenario paths. Ask me specific risk drivers.
+                </div>
+            </div>
+            <div class="preset-grid">
+                <button class="btn-preset" onclick="triggerPreset('Why is PD high?')">Why is PD high?</button>
+                <button class="btn-preset" onclick="triggerPreset('Why LC required?')">Why LC required?</button>
+                <button class="btn-preset" onclick="triggerPreset('What if Brent rises?')">What if Brent rises?</button>
+                <button class="btn-preset" onclick="triggerPreset('Why 30 days tenor?')">Why 30 days tenor?</button>
+            </div>
+            <div class="chat-input-wrapper">
+                <input type="text" id="copilot-input" placeholder="Query model execution logs...">
+                <button onclick="sendCopilotMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </aside>
+
+    </div>
+
+    <div id="ingest-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 style="font-size:0.95rem; font-weight:bold;">Top-Level Data Ingestion Stream Panel</h3>
+                <button onclick="closeIngestModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.1rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="ingest-tabs">
+                    <button id="modal-tab-pdf" class="ingest-tab-btn active" onclick="switchModalOption('pdf')">Upload Balance Sheet PDF</button>
+                    <button id="modal-tab-form" class="ingest-tab-btn" onclick="switchModalOption('form')">Enter Financial Details Manually</button>
+                </div>
+
+                <form id="ingestion-form" onsubmit="handleFormSubmission(event)">
+                    <div class="form-row-3" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group"><label>Tracking / Counterparty Name *</label><input type="text" id="track-name" placeholder="e.g., Global Aero Carrier" required></div>
+                        <div class="form-group"><label>Segment Classification</label><select id="track-segment"><option value="Airline">Airline (Jet Fuel Model)</option><option value="Shipowner">Shipowner (Marine Bunker)</option></select></div>
+                    </div>
+                    <div class="form-row-3" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group"><label>Country</label><input type="text" id="track-country" value="United Kingdom"></div>
+                        <div class="form-group"><label>Requested Limit ($)</label><input type="text" id="track-limit" value="$12.0M"></div>
+                    </div>
+
+                    <div id="modal-conditional-pdf">
+                        <div class="form-group">
+                            <label>Source Audit Document</label>
+                            <div class="file-drop-zone">
+                                <i class="fa-solid fa-file-pdf" style="font-size:2rem; color:var(--accent); margin-bottom:6px;"></i>
+                                <p style="font-size:0.8rem; font-weight:500;">Drop annual report/statement PDF here or click to browse</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="modal-conditional-form" style="display: none;">
+                        <div class="form-row-3">
+                            <div class="form-group"><label>Revenue ($)</label><input type="number" id="in-rev" value="950000000"></div>
+                            <div class="form-group"><label>EBITDA ($)</label><input type="number" id="in-ebitda" value="110000000"></div>
+                            <div class="form-group"><label>EBIT ($)</label><input type="number" id="in-ebit" value="64000000"></div>
+                        </div>
+                        <div class="form-row-3">
+                            <div class="form-group"><label>Net Income ($)</label><input type="number" id="in-net" value="21000000"></div>
+                            <div class="form-group"><label>Total Assets ($)</label><input type="number" id="in-assets" value="720000000"></div>
+                            <div class="form-group"><label>Total Debt ($)</label><input type="number" id="in-debt" value="310000000"></div>
+                        </div>
+                        <div class="form-row-3">
+                            <div class="form-group"><label>Equity ($)</label><input type="number" id="in-equity" value="410000000"></div>
+                            <div class="form-group"><label>Current Liabilities ($)</label><input type="number" id="in-liab" value="150000000"></div>
+                            <div class="form-group"><label>Liquid Cash ($)</label><input type="number" id="in-cash" value="75000000"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit">Ingest Framework & Update Terminal Statements</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentModalView = 'pdf';
+
+        // Master Model Database
+        const database = {
+            skyways: { name: "Skyways Airlines Global", segment: "Airline (Jet Fuel)", country: "United States", req: "$10.0M", pd: "8.8%", lgd: "52%", ead: "$12.4M", el: "$566K", grade: "BB", terms: "$8M / 30d / LC", rev: "$1,200.0M", ebitda: "$140.0M", ebit: "$82.0M", net: "$32.0M", cash: "$90.0M", assets: "$850.0M", debt: "$650.0M", equity: "$200.0M", liab: "$210.0M", currRatio: "1.15x", leverage: "4.64x", debtEq: "3.25x", opMargin: "6.83%", confidence: "94% Confidence (SEC Filings catalog verified)", fuelBar: "90%", levBar: "75%", verdict: "Conditional Approval Mandate", rationale: "Limit restricted due to elevated baseline leverage footprints. Strict Standby LC guidelines required for fuel trade asset security." },
+            oceanic: { name: "Oceanic Logistics Group", segment: "Shipowner (Marine Bunker)", country: "Greece", req: "$5.0M", pd: "3.2%", lgd: "40%", ead: "$5.8M", el: "$185K", grade: "BBB-", terms: "$5M / 45d / Open", rev: "$680.0M", ebitda: "$110.0M", ebit: "$72.0M", net: "$45.0M", cash: "$115.0M", assets: "$540.0M", debt: "$220.0M", equity: "$320.0M", liab: "$120.0M", currRatio: "1.95x", leverage: "2.00x", debtEq: "0.68x", opMargin: "10.58%", confidence: "98% Confidence (Direct Audit verification complete)", fuelBar: "40%", levBar: "35%", verdict: "Approved (Open Terms Eligible)", rationale: "Counterparty displays conservative capital structure multiples and healthy cash conversion cycles. Low single-name model risk." }
+        };
+
+        // UI Dropdown Controller Mechanics
+        function toggleSearchDropdown() {
+            const el = document.getElementById('search-dropdown-wrapper');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function filterCounterparties() {
+            const query = document.getElementById('selector-search-box').value.toLowerCase();
+            const options = document.querySelectorAll('#dropdown-options-container .dropdown-option');
+            options.forEach(opt => {
+                const text = opt.innerText.toLowerCase();
+                opt.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function selectCounterparty(key) {
+            const data = database[key];
+            if (!data) return;
+
+            document.getElementById('selected-name-display').innerText = data.name;
+            document.getElementById('search-dropdown-wrapper').style.display = 'none';
+            updateTerminalState(data);
+        }
+
+        // State Synchronizer Engine
+        function updateTerminalState(data) {
+            // Header zone
+            document.getElementById('head-segment').innerText = data.segment;
+            document.getElementById('head-country').innerText = data.country;
+            document.getElementById('head-requested').innerText = data.req;
+
+            // Page 1 main dashboards
+            document.getElementById('kpi-pd').innerText = data.pd;
+            document.getElementById('kpi-lgd').innerText = data.lgd;
+            document.getElementById('kpi-ead').innerText = data.ead;
+            document.getElementById('kpi-el').innerText = data.el;
+            document.getElementById('kpi-grade').innerText = data.grade;
+            document.getElementById('kpi-terms').innerText = data.terms;
+
+            document.getElementById('s-rev').innerText = data.rev;
+            document.getElementById('s-ebitda').innerText = data.ebitda;
+            document.getElementById('s-debt').innerText = data.debt;
+            document.getElementById('s-cash').innerText = data.cash;
+
+            document.getElementById('b-fuel').style.width = data.fuelBar;
+            document.getElementById('b-lev').style.width = data.levBar;
+            document.getElementById('s-verdict').innerText = data.verdict;
+            document.getElementById('s-rationale').innerText = data.rationale;
+
+            // Page 2 Statement mappings
+            document.getElementById('f-rev').innerText = data.rev;
+            document.getElementById('f-ebitda').innerText = data.ebitda;
+            document.getElementById('f-ebit').innerText = data.ebit;
+            document.getElementById('f-net').innerText = data.net;
+            document.getElementById('f-cash').innerText = data.cash;
+            document.getElementById('f-assets').innerText = data.assets;
+            document.getElementById('f-debt').innerText = data.debt;
+            document.getElementById('f-equity').innerText = data.equity;
+            document.getElementById('f-liab').innerText = data.liab;
+
+            document.getElementById('r-curr').innerText = data.currRatio;
+            document.getElementById('r-debtebitda').innerText = data.leverage;
+            document.getElementById('r-debteq').innerText = data.debtEq;
+            document.getElementById('r-margin').innerText = data.opMargin;
+
+            document.getElementById('audit-score').innerText = data.confidence;
+
+            // Page 6 & 7 updates
+            document.getElementById('u-verdict').innerText = data.verdict;
+            document.getElementById('u-limit').innerText = data.terms.split('/')[0];
+            document.getElementById('u-tenor').innerText = data.terms.split('/')[1] || "30 Days";
+            document.getElementById('u-security').innerText = data.terms.split('/')[2] ? "Confirmed LC" : "Open Account";
+            document.getElementById('u-grade').innerText = data.grade;
+            document.getElementById('u-rationale').innerText = data.rationale;
+
+            document.getElementById('memo-box').innerHTML = `
+                [EXECUTIVE CREDIT RISK MEMORANDUM AUTOMATION RECORDED]<br>
+                TARGET COUNTERPARTY OBJECT DESIGNATION: ${data.name.toUpperCase()}<br><br>
+                Evaluated statement models show financial parameters locked. Calculated revenue matches ${data.rev} against leverage metrics mapped at ${data.leverage}. Recommendation aligns with system security guidelines. All data variables are grounded.
+            `;
+
+            // Inform persistent co-pilot
+            const chatBox = document.getElementById('copilot-chat-box');
+            const systemNotice = document.createElement('div');
+            systemNotice.className = "bubble bubble-system";
+            systemNotice.style.borderLeft = "3px solid var(--warning)";
+            systemNotice.innerHTML = `⚠️ <strong>Terminal Context Switched:</strong> Tracking system focus changed to <strong>${data.name}</strong> variables.`;
+            chatBox.appendChild(systemNotice);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Navigation Controller
+        function navigateTerminal(event, targetId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
+        }
+
+        // Modal Engine Pipeline
+        function openIngestModal() { document.getElementById('ingest-modal').style.display = 'flex'; }
+        function closeIngestModal() { document.getElementById('ingest-modal').style.display = 'none'; }
+
+        function switchModalOption(type) {
+            currentModalView = type;
+            document.getElementById('modal-tab-pdf').classList.toggle('active', type === 'pdf');
+            document.getElementById('modal-tab-form').classList.toggle('active', type === 'form');
+            document.getElementById('modal-conditional-pdf').style.display = type === 'pdf' ? 'block' : 'none';
+            document.getElementById('modal-conditional-form').style.display = type === 'form' ? 'block' : 'none';
+        }
+
+        // Dynamic Pipeline Data Ingestion Handler (Feeds directly to Tab 2 & updates context)
+        function handleFormSubmission(e) {
+            e.preventDefault();
+            const name = document.getElementById('track-name').value;
+            const segment = document.getElementById('track-segment').value;
+            const country = document.getElementById('track-country').value;
+            const limitReq = document.getElementById('track-limit').value;
+
+            let customData = {};
+
+            if (currentModalView === 'form') {
+                const rev = parseFloat(document.getElementById('in-rev').value);
+                const ebitda = parseFloat(document.getElementById('in-ebitda').value);
+                const ebit = parseFloat(document.getElementById('in-ebit').value);
+                const net = parseFloat(document.getElementById('in-net').value);
+                const assets = parseFloat(document.getElementById('in-assets').value);
+                const debt = parseFloat(document.getElementById('in-debt').value);
+                const equity = parseFloat(document.getElementById('in-equity').value);
+                const liab = parseFloat(document.getElementById('in-liab').value);
+                const cash = parseFloat(document.getElementById('in-cash').value);
+
+                const cRatio = (assets / liab * 0.4).toFixed(2) + "x"; // Formulating structural proxies
+                const levMult = (debt / ebitda).toFixed(2) + "x";
+                const dEq = (debt / equity).toFixed(2) + "x";
+                const margin = (ebit / rev * 100).toFixed(2) + "%";
+
+                customData = {
+                    name: name, segment: segment, country: country, req: limitReq,
+                    pd: "6.4%", lgd: "45%", ead: "$" + (rev * 0.01).toFixed(1) + "M", el: "$310K", grade: "BBB",
+                    terms: "$" + (rev * 0.008).toFixed(0) + "M / 30d / SBLC",
+                    rev: "$" + (rev / 1000000).toFixed(1) + "M",
+                    ebitda: "$" + (ebitda / 1000000).toFixed(1) + "M",
+                    ebit: "$" + (ebit / 1000000).toFixed(1) + "M",
+                    net: "$" + (net / 1000000).toFixed(1) + "M",
+                    cash: "$" + (cash / 1000000).toFixed(1) + "M",
+                    assets: "$" + (assets / 1000000).toFixed(1) + "M",
+                    debt: "$" + (debt / 1000000).toFixed(1) + "M",
+                    equity: "$" + (equity / 1000000).toFixed(1) + "M",
+                    liab: "$" + (liab / 1000000).toFixed(1) + "M",
+                    currRatio: cRatio, leverage: levMult, debtEq: dEq, opMargin: margin,
+                    confidence: "100% Verified Manual Entry (Risk Engine calculated thresholds passed)",
+                    fuelBar: "65%", levBar: "50%",
+                    verdict: "Approved with Facility Conditions",
+                    rationale: "Manually submitted metrics successfully compiled. Risk thresholds pass credit model parameters under base-case commodity volatility indexes."
+                };
+            } else {
+                // PDF Parsing Mock State Injection
+                customData = {
+                    name: name + " (Extracted PDF)", segment: segment, country: country, req: limitReq,
+                    pd: "9.2%", lgd: "55%", ead: "$14.1M", el: "$715K", grade: "B+", terms: "$6M / 15d / Confirmed LC",
+                    rev: "$890.0M", ebitda: "$95.0M", ebit: "$51.0M", net: "$18.0M", cash: "$45.0M", assets: "$610.0M", debt: "$420.0M", equity: "$140.0M", liab: "$190.0M",
+                    currRatio: "1.08x", leverage: "4.42x", debtEq: "3.00x", opMargin: "5.73%",
+                    confidence: "88% Confidence OCR Pipeline Parsed (Warning boxes cleared)",
+                    fuelBar: "95%", levBar: "85%",
+                    verdict: "Review Mandated (High Risk)",
+                    rationale: "AI document pipeline parsed statements. Elevated structural metrics map thin liquidity profiles across active refined oil shock quantile intervals."
+                };
+            }
+
+            // Append dynamic client model to searchable search selection drop lists
+            const dropContainer = document.getElementById('dropdown-options-container');
+            const newLi = document.createElement('li');
+            const key = "custom_" + Date.now();
+            database[key] = customData;
+
+            newLi.className = "dropdown-option";
+            newLi.setAttribute("onclick", `selectCounterparty('${key}')`);
+            newLi.innerHTML = `<strong>${customData.name}</strong><span style="font-size:0.7rem; color:var(--text-muted)">${customData.segment} | ${customData.country}</span>`;
+            dropContainer.appendChild(newLi);
+
+            // Execute selection update & navigate focus directly to Tab 2 to verify data
+            document.getElementById('selected-name-display').innerText = customData.name;
+            updateTerminalState(customData);
+            closeIngestModal();
+            document.getElementById('ingestion-form').reset();
+            
+            // UX transition focus redirection to Financial Statements
+            navigateTerminal(null, 'financial-statements');
+        }
+
+        // AI Co-Pilot Chat Communications Engine Mechanics
+        function triggerPreset(text) {
+            document.getElementById('copilot-input').value = text;
+            sendCopilotMessage();
+        }
+
+        function sendCopilotMessage() {
+            const el = document.getElementById('copilot-input');
+            const prompt = el.value.trim();
+            if (!prompt) return;
+
+            const box = document.getElementById('copilot-chat-box');
+            const uBubble = document.createElement('div');
+            uBubble.className = "bubble bubble-user";
+            uBubble.innerText = prompt;
+            box.appendChild(uBubble);
+
+            el.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            setTimeout(() => {
+                const firm = document.getElementById('selected-name-display').innerText;
+                const currentData = Object.values(database).find(item => item.name === firm) || database.skyways;
+                
+                const sBubble = document.createElement('div');
+                sBubble.className = "bubble bubble-system";
+                
+                if (prompt.includes('PD')) {
+                    sBubble.innerHTML = `<strong>Context Audit [${firm}]:</strong> Merton structural frameworks analyze default factors using total debt parameters (${currentData.debt}) balancing against net asset volatilities.`;
+                } else if (prompt.includes('LC')) {
+                    sBubble.innerHTML = `<strong>Context Audit [${firm}]:</strong> Restricting contract security via a Letter of Credit manages expected unsecured loss severities (LGD currently rated at ${currentData.lgd}) down to structural safe targets.`;
+                } else {
+                    sBubble.innerHTML = `<strong>Grounded Analysis:</strong> Input models for <strong>${firm}</strong> are locked. Stated operating financials show revenue metrics tracking at ${currentData.rev}. Ratios match the active credit policy parameters.`;
+                }
+
+                box.appendChild(sBubble);
+                box.scrollTop = box.scrollHeight;
+            }, 500);
+        }
+
+        // Close selectors when clicking outside boundaries
+        window.addEventListener('click', function(e) {
+            if (!document.getElementById('active-select-trigger').contains(e.target) && !document.getElementById('search-dropdown-wrapper').contains(e.target)) {
+                document.getElementById

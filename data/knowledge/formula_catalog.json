@@ -1,0 +1,213 @@
+{
+  "version": "copilot_formula_catalog_v1",
+  "purpose": "Canonical formulas and calculation explanations for the project copilot.",
+  "formulas": [
+    {
+      "formula_id": "current_ratio",
+      "name": "Current Ratio",
+      "formula": "current_ratio = current_assets / current_liabilities",
+      "inputs": ["current_assets", "current_liabilities"],
+      "output": "current_ratio",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This measures whether short-term assets can cover short-term obligations."
+    },
+    {
+      "formula_id": "quick_ratio",
+      "name": "Quick Ratio",
+      "formula": "quick_ratio = (cash_and_equivalents + accounts_receivable) / current_liabilities; fallback quick_ratio = (current_assets - inventory) / current_liabilities",
+      "inputs": ["cash_and_equivalents", "accounts_receivable", "current_assets", "inventory", "current_liabilities"],
+      "output": "quick_ratio",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This is a tighter liquidity check than current ratio. It uses receivables directly when available, or excludes inventory from current assets as a fallback."
+    },
+    {
+      "formula_id": "cash_ratio",
+      "name": "Cash Ratio",
+      "formula": "cash_ratio = cash_and_equivalents / current_liabilities",
+      "inputs": ["cash_and_equivalents", "current_liabilities"],
+      "output": "cash_ratio",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This checks how much short-term liability coverage exists in cash."
+    },
+    {
+      "formula_id": "debt_to_equity",
+      "name": "Debt To Equity",
+      "formula": "debt_to_equity = total_debt / shareholders_equity",
+      "inputs": ["total_debt", "shareholders_equity"],
+      "output": "debt_to_equity",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This measures leverage against book equity."
+    },
+    {
+      "formula_id": "debt_to_ebitda",
+      "name": "Debt To EBITDA",
+      "formula": "debt_to_ebitda = total_debt / ebitda",
+      "inputs": ["total_debt", "ebitda"],
+      "output": "debt_to_ebitda",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This estimates how many years of EBITDA would be needed to cover debt, ignoring growth and cash leakage."
+    },
+    {
+      "formula_id": "interest_coverage",
+      "name": "Interest Coverage",
+      "formula": "interest_coverage = ebit / interest_expense",
+      "inputs": ["ebit", "interest_expense"],
+      "output": "interest_coverage",
+      "source_files": ["api/shared/financial_ratios.py"],
+      "plain_english": "This measures how comfortably operating profit covers interest expense."
+    },
+    {
+      "formula_id": "pca_pc1",
+      "name": "PCA First Principal Component",
+      "formula": "Z = standardized_market_components; pc1_score = PCA(n_components=1).fit_transform(Z)[:, 0]",
+      "inputs": ["commodity_pressure", "jet_crack_spread", "crude_inventory_build", "opec_production_cut", "volatility_pressure", "equity_pressure", "fx_pressure", "rates_pressure", "global_pmi_weakness", "iata_traffic_loss", "freight_pressure"],
+      "output": "pc1_score",
+      "source_files": ["api/market_data/stress_index.py"],
+      "plain_english": "PCA compresses several market stress components into one main market factor. If enough component history exists, the first principal component becomes the combined stress signal."
+    },
+    {
+      "formula_id": "pca_stress_index",
+      "name": "PCA Market Stress Index",
+      "formula": "stress_index = percentile_scale(pc1_score)",
+      "inputs": ["pc1_score"],
+      "output": "stress_index",
+      "source_files": ["api/market_data/stress_index.py"],
+      "plain_english": "The first principal component is rescaled to a 0-100 stress index so the dashboard and models can read it as low-to-high stress."
+    },
+    {
+      "formula_id": "jet_crack_spread",
+      "name": "Jet Crack Spread",
+      "formula": "jet_crack_spread = jet_fuel_proxy * 42 - brent_oil",
+      "inputs": ["jet_fuel_proxy", "brent_oil"],
+      "output": "jet_crack_spread",
+      "source_files": ["api/market_data/external_providers.py"],
+      "plain_english": "EIA jet fuel is stored in dollars per gallon, so it is multiplied by 42 to convert to dollars per barrel before subtracting crude. A wider spread means aviation fuel is expensive relative to crude."
+    },
+    {
+      "formula_id": "merton_distance_to_default",
+      "name": "Merton Distance To Default",
+      "formula": "DD = (ln(asset_value / debt_barrier) + (risk_free_rate - 0.5 * asset_volatility^2) * time_horizon) / (asset_volatility * sqrt(time_horizon))",
+      "inputs": ["asset_value", "debt_barrier", "risk_free_rate", "asset_volatility", "time_horizon"],
+      "output": "distance_to_default",
+      "source_files": ["api/machine_learning/pd_model.py", "api/structural_credit/distance_to_default.py"],
+      "plain_english": "Distance to default estimates how far assets are from the debt barrier after accounting for volatility and time."
+    },
+    {
+      "formula_id": "merton_structural_pd",
+      "name": "Merton Structural PD",
+      "formula": "structural_pd = N(-distance_to_default)",
+      "inputs": ["distance_to_default"],
+      "output": "structural_pd",
+      "source_files": ["api/machine_learning/pd_model.py", "api/structural_credit/merton_model.py"],
+      "plain_english": "Lower distance to default produces a higher default probability."
+    },
+    {
+      "formula_id": "ml_pd_proxy",
+      "name": "ML Proxy PD",
+      "formula": "ml_pd = optional_blend(rule_based_logistic_pd, trained_historical_pd)",
+      "inputs": ["financial_ratios", "market_stress_index", "vulnerability_scores", "jet_crack_spread", "eia_crude_inventories", "opec_production", "global_pmi", "iata_passenger_traffic", "historical_pd_model.pkl"],
+      "output": "ml_pd",
+      "source_files": ["api/machine_learning/pd_model.py", "data/models/historical_pd_model.pkl"],
+      "plain_english": "The ML side uses ratios and market features as a data-driven cross-check. It is trained on free-source proxy distress labels, not internal bank default data."
+    },
+    {
+      "formula_id": "final_pd_blend",
+      "name": "Final PD Blend",
+      "formula": "final_pd = clip((structural_weight * structural_pd + ml_weight * ml_pd) * sqrt(financial_trend_pd_multiplier)) when financial history is available; otherwise the multiplier is 1.0",
+      "inputs": ["structural_pd", "ml_pd", "pd_blend_config.json", "financial_trend_features"],
+      "output": "final_pd",
+      "source_files": ["api/machine_learning/pd_model.py", "api/financials/trends.py", "data/models/pd_blend_config.json"],
+      "plain_english": "The final default probability combines the structural model and the ML model. If the user supplied multiple years or quarters, deteriorating or improving financial history can apply a capped multiplier."
+    },
+    {
+      "formula_id": "financial_trend_overlay",
+      "name": "Financial Trend Overlay",
+      "formula": "trend_risk_score = capped sum of revenue, margin, debt, leverage, coverage, liquidity, cash, and fuel-cost trend pressures minus improvement offsets",
+      "inputs": ["revenue_cagr", "latest_revenue_growth", "ebitda_margin_trend", "debt_growth", "leverage_trend", "interest_coverage_trend", "current_ratio_trend", "cash_trend", "fuel_cost_growth"],
+      "output": "pd_multiplier, asset_volatility_addon, lgd_addon, liquidity_score",
+      "source_files": ["api/financials/trends.py"],
+      "plain_english": "The overlay is neutral with less than two periods. With enough history, worsening trends can slightly raise PD and LGD, while improving trends can slightly reduce PD."
+    },
+    {
+      "formula_id": "lgd_blend",
+      "name": "LGD Blend",
+      "formula": "predicted_lgd = clip(0.65 * business_lgd + 0.35 * trained_lgd, 0.01, 0.99) when trained LGD is available",
+      "inputs": ["business_lgd", "historical_lgd_model.pkl", "collateral_terms", "tenor", "security_flags"],
+      "output": "predicted_lgd",
+      "source_files": ["api/machine_learning/loss_model.py", "data/models/historical_lgd_model.pkl"],
+      "plain_english": "LGD starts with collateral-aware business logic and then uses the trained artifact as a severity cross-check."
+    },
+    {
+      "formula_id": "ead_business_logic",
+      "name": "Business EAD",
+      "formula": "business_ead = min(logical_limit, outstanding_receivables + expected_drawdown)",
+      "inputs": ["logical_limit", "outstanding_receivables", "expected_drawdown"],
+      "output": "business_ead",
+      "source_files": ["api/machine_learning/loss_model.py"],
+      "plain_english": "EAD estimates the exposure that could be outstanding at default, capped by the relevant credit limit when available."
+    },
+    {
+      "formula_id": "ead_blend",
+      "name": "EAD Blend",
+      "formula": "exposure_at_default = 0.70 * business_ead + 0.30 * trained_ead, capped by logical_limit when applicable",
+      "inputs": ["business_ead", "calibrated_ead_model.pkl", "logical_limit"],
+      "output": "exposure_at_default",
+      "source_files": ["api/machine_learning/loss_model.py", "data/models/calibrated_ead_model.pkl"],
+      "plain_english": "The final EAD combines deterministic exposure logic with the calibrated EAD artifact."
+    },
+    {
+      "formula_id": "expected_loss",
+      "name": "Expected Loss",
+      "formula": "expected_loss = probability_of_default * loss_given_default * exposure_at_default",
+      "inputs": ["probability_of_default", "loss_given_default", "exposure_at_default"],
+      "output": "expected_loss",
+      "source_files": ["api/machine_learning/loss_model.py", "api/credit_decision/engine.py"],
+      "plain_english": "Expected loss turns default likelihood, severity, and exposure into a currency amount."
+    },
+    {
+      "formula_id": "risk_grade_mapping",
+      "name": "Risk Grade Mapping",
+      "formula": "A < 1%; BBB 1-3%; BB 3-7%; B 7-15%; CCC >= 15%",
+      "inputs": ["probability_of_default"],
+      "output": "risk_grade",
+      "source_files": ["api/credit_decision/engine.py"],
+      "plain_english": "The project maps numeric PD to an internal proxy grade. This is not an external rating agency grade."
+    },
+    {
+      "formula_id": "recommended_limit",
+      "name": "Recommended Credit Limit",
+      "formula": "recommended_credit_limit = base_limit * (1 - limit_haircut)",
+      "inputs": ["base_limit", "limit_haircut"],
+      "output": "recommended_credit_limit",
+      "source_files": ["api/credit_decision/engine.py"],
+      "plain_english": "The credit engine starts from requested limit, approved limit, or EAD, then applies risk haircuts."
+    },
+    {
+      "formula_id": "recommended_tenor",
+      "name": "Recommended Tenor",
+      "formula": "recommended_tenor_days = policy_rule(risk_grade, policy_score)",
+      "inputs": ["risk_grade", "policy_score"],
+      "output": "recommended_tenor_days",
+      "source_files": ["api/credit_decision/engine.py"],
+      "plain_english": "Riskier names get shorter tenors to control receivable build-up."
+    },
+    {
+      "formula_id": "recommended_security",
+      "name": "Recommended Security",
+      "formula": "recommended_security = policy_rule(risk_grade, policy_score, probability_of_default)",
+      "inputs": ["risk_grade", "policy_score", "probability_of_default"],
+      "output": "recommended_security",
+      "source_files": ["api/credit_decision/engine.py"],
+      "plain_english": "The engine asks for stronger security when PD, grade, or policy score is weaker."
+    },
+    {
+      "formula_id": "approval_status",
+      "name": "Approval Status",
+      "formula": "approval_status = policy_rule(risk_grade, policy_score, recommended_credit_limit)",
+      "inputs": ["risk_grade", "policy_score", "recommended_credit_limit"],
+      "output": "approval_status",
+      "source_files": ["api/credit_decision/engine.py"],
+      "plain_english": "The final decision label is a policy output. The copilot should explain it, not create a new one."
+    }
+  ]
+}

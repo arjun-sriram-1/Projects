@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RiskIntel Agent</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div id="app-frame" class="app-frame">
+    <header class="topbar">
+      <div class="brand">
+        <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+        <span>RiskIntel Agent</span>
+      </div>
+
+      <div class="counterparty-picker">
+        <label class="sr-only" for="counterparty-search">Counterparty</label>
+        <input id="counterparty-search" type="search" autocomplete="off" placeholder="Search counterparty">
+        <button id="counterparty-toggle" class="selector" type="button">
+          <span id="selected-counterparty">Loading counterparties</span>
+          <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div id="counterparty-results" class="selector-menu" hidden></div>
+      </div>
+
+      <div class="top-meta">
+        <div class="meta-pill">Segment: <strong id="segment-label">Airline (Jet Fuel)</strong></div>
+        <div class="meta-pill">Country: <strong id="country-label">United States</strong></div>
+        <div class="meta-pill">Requested Limit: <strong id="limit-label">Not set</strong></div>
+        <div class="meta-pill">Tenor: <strong id="tenor-label">Not set</strong></div>
+        <div class="meta-pill">Security: <strong id="security-label">Not set</strong></div>
+      </div>
+
+      <button id="open-ingest" class="primary-action" type="button">
+        <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+        <span>Ingest New Data</span>
+      </button>
+
+      <button id="refresh-market" class="secondary-action top-action" type="button">
+        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+        <span>Refresh Market</span>
+      </button>
+
+      <button id="delete-counterparty" class="danger-action" type="button">
+        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+        <span>Delete Counterparty</span>
+      </button>
+
+      <button id="toggle-copilot" class="copilot-toggle" type="button" aria-expanded="false" aria-controls="credit-copilot">
+        <i class="fa-solid fa-robot" aria-hidden="true"></i>
+        <span>AI Co-Pilot</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div class="terminal-body">
+      <aside class="sidebar" aria-label="Risk framework navigation">
+        <div class="sidebar-title">Risk Framework</div>
+        <nav id="page-nav"></nav>
+      </aside>
+
+      <main class="main-viewport">
+        <div id="status-banner" class="status-banner" hidden></div>
+        <section id="page-root" class="page-root" aria-live="polite"></section>
+      </main>
+
+      <aside id="credit-copilot" class="copilot" aria-label="Live Credit Co-Pilot" hidden>
+        <div class="copilot-head">
+          <i class="fa-solid fa-robot" aria-hidden="true"></i>
+          <span>Live Credit Co-Pilot</span>
+        </div>
+        <div id="copilot-context" class="copilot-context"></div>
+        <div id="copilot-feed" class="copilot-feed"></div>
+        <div class="prompt-grid">
+          <button type="button" data-prompt="Why is PD high?">Why is PD high?</button>
+          <button type="button" data-prompt="Why was limit reduced?">Why was limit reduced?</button>
+          <button type="button" data-prompt="Why is LC required?">Why is LC required?</button>
+          <button type="button" data-prompt="What changes under adverse scenario?">Adverse scenario?</button>
+        </div>
+        <form id="copilot-form" class="copilot-form">
+          <label class="sr-only" for="copilot-input">Ask the copilot</label>
+          <input id="copilot-input" type="text" placeholder="Query model execution logs...">
+          <button type="submit" aria-label="Send query"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+        </form>
+      </aside>
+    </div>
+  </div>
+
+  <div id="ingest-modal" class="modal-backdrop" hidden>
+    <section class="ingest-modal" role="dialog" aria-modal="true" aria-labelledby="ingest-title">
+      <div class="modal-head">
+        <div>
+          <h2 id="ingest-title">Ingest New Credit Data</h2>
+          <p>Annual report upload and manual financial capture share the same backend pipeline.</p>
+        </div>
+        <button id="close-ingest" class="icon-button" type="button" aria-label="Close">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab is-active" type="button" data-tab="upload">PDF Upload</button>
+        <button class="tab" type="button" data-tab="manual">Manual Entry</button>
+      </div>
+
+      <form id="upload-form" class="ingest-form">
+        <div class="form-grid">
+          <label>Counterparty Name<input name="counterparty_name" type="text" required></label>
+          <label>Country<input name="country" type="text" value="United States"></label>
+          <label>Document Type<select name="document_type"><option value="annual_report">Annual Report</option><option value="financial_statement">Financial Statement</option></select></label>
+          <label class="file-field">PDF Document<input name="file" type="file" accept="application/pdf" required></label>
+        </div>
+        <div class="terms-panel">
+          <h3>Requested Credit Terms</h3>
+          <div class="form-grid wide">
+            <label>Requested Limit<input name="requested_credit_limit" type="number" min="0" step="100000" placeholder="Enter requested limit" required></label>
+            <label>Requested Tenor Days<input name="payment_tenor_days" type="number" min="1" step="1" value="30" required></label>
+            <label>Security<select name="collateral_type"><option value="unsecured">Unsecured</option><option value="letter_of_credit">Standby LC</option><option value="guarantee">Bank Guarantee</option><option value="cash_deposit">Cash Deposit</option><option value="secured_collateral">Secured Collateral</option></select></label>
+            <label>Approved Limit<input name="approved_credit_limit" type="number" min="0" step="100000" placeholder="Defaults to requested limit"></label>
+            <label>Outstanding Receivables<input name="outstanding_receivables" type="number" min="0" step="100000" placeholder="Defaults to 35% of requested"></label>
+            <label>Utilization %<input name="utilization_rate" type="number" min="0" max="100" step="1" value="55"></label>
+            <label>Invoice Amount<input name="invoice_amount" type="number" min="0" step="10000" placeholder="Optional"></label>
+            <label>Fuel Volume<input name="fuel_volume" type="number" min="0" step="1000" placeholder="Optional"></label>
+            <label>Fuel Price<input name="fuel_price" type="number" min="0" step="0.01" placeholder="Optional"></label>
+            <label>Cash Deposit %<input name="deposit_percentage" type="number" min="0" max="100" step="1" value="0"></label>
+          </div>
+        </div>
+        <button class="primary-action modal-submit" type="submit">Upload and Run Models</button>
+      </form>
+
+      <form id="manual-form" class="ingest-form" hidden>
+        <div class="form-grid">
+          <label>Counterparty Name<input name="counterparty_name" type="text" required></label>
+        </div>
+        <div id="manual-period-list" class="manual-period-list">
+          <section class="manual-period-block" data-period-block>
+            <div class="manual-period-head">
+              <div>
+                <strong>Financial Period 1</strong>
+                <span>Latest snapshot used by current models</span>
+              </div>
+              <label class="latest-toggle"><input name="is_latest_snapshot" type="radio" checked> Latest</label>
+            </div>
+            <div class="form-grid wide">
+              <label>Fiscal Year<input name="fiscal_year" type="number" value="2025"></label>
+              <label>Period Type<select name="period_type"><option value="annual">Annual</option><option value="quarterly">Quarterly</option></select></label>
+              <label>Period Label<select name="period_label"><option value="FY">FY</option><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select></label>
+              <label>Currency<input name="currency" type="text" value="USD" maxlength="3"></label>
+              <label>Revenue<input name="revenue" type="number" min="0" step="1000" required></label>
+              <label>EBITDA<input name="ebitda" type="number" step="1000"></label>
+              <label>EBIT / Operating Profit<input name="ebit" type="number" step="1000"></label>
+              <label>Operating Margin %<input name="operating_margin_percent" type="number" min="-100" max="100" step="0.1" placeholder="Used only if EBIT is blank"></label>
+              <label>Net Income<input name="net_income" type="number" step="1000"></label>
+              <label>Cash<input name="cash_and_equivalents" type="number" min="0" step="1000"></label>
+              <label>Accounts Receivable<input name="accounts_receivable" type="number" min="0" step="1000"></label>
+              <label>Inventory<input name="inventory" type="number" min="0" step="1000"></label>
+              <label>Current Assets<input name="current_assets" type="number" min="0" step="1000"></label>
+              <label>Total Assets<input name="total_assets" type="number" min="0" step="1000" required></label>
+              <label>Current Liabilities<input name="current_liabilities" type="number" min="0" step="1000"></label>
+              <label>Total Debt<input name="total_debt" type="number" min="0" step="1000" required></label>
+              <label>Total Liabilities<input name="total_liabilities" type="number" min="0" step="1000"></label>
+              <label>Shareholders Equity<input name="shareholders_equity" type="number" step="1000"></label>
+              <label>Interest Expense<input name="interest_expense" type="number" min="0" step="1000"></label>
+            </div>
+          </section>
+        </div>
+        <button id="add-manual-period" class="secondary-action add-period-button" type="button">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          Add Previous Period
+        </button>
+        <div class="terms-panel">
+          <h3>Requested Credit Terms</h3>
+          <div class="form-grid wide">
+            <label>Requested Limit<input name="requested_credit_limit" type="number" min="0" step="100000" placeholder="Enter requested limit" required></label>
+            <label>Requested Tenor Days<input name="payment_tenor_days" type="number" min="1" step="1" value="30" required></label>
+            <label>Security<select name="collateral_type"><option value="unsecured">Unsecured</option><option value="letter_of_credit">Standby LC</option><option value="guarantee">Bank Guarantee</option><option value="cash_deposit">Cash Deposit</option><option value="secured_collateral">Secured Collateral</option></select></label>
+            <label>Approved Limit<input name="approved_credit_limit" type="number" min="0" step="100000" placeholder="Defaults to requested limit"></label>
+            <label>Outstanding Receivables<input name="outstanding_receivables" type="number" min="0" step="100000" placeholder="Defaults to 35% of requested"></label>
+            <label>Utilization %<input name="utilization_rate" type="number" min="0" max="100" step="1" value="55"></label>
+            <label>Invoice Amount<input name="invoice_amount" type="number" min="0" step="10000" placeholder="Optional"></label>
+            <label>Fuel Volume<input name="fuel_volume" type="number" min="0" step="1000" placeholder="Optional"></label>
+            <label>Fuel Price<input name="fuel_price" type="number" min="0" step="0.01" placeholder="Optional"></label>
+            <label>Cash Deposit %<input name="deposit_percentage" type="number" min="0" max="100" step="1" value="0"></label>
+          </div>
+        </div>
+        <button class="primary-action modal-submit" type="submit">Save and Run Models</button>
+      </form>
+    </section>
+  </div>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+LOW RISK COUNTERPARTY POLICY
+
+Applies when:
+PD and expected loss are low, liquidity and debt service are strong, leverage is
+acceptable, and market stress does not materially impair repayment capacity.
+
+Credit line treatment:
+Requested credit line may be approved when it is at or below the recommended
+credit line and policy checks pass.
+
+Maximum tenor:
+60-90 days depending on financial strength and market regime.
+
+Required security:
+Optional for strong counterparties; guarantee or LC may still be required for
+large requested lines or volatile fuel-market regimes.
+
+Approval:
+Relationship manager or credit manager according to exposure size.
+
+Review frequency:
+Semi-annual, or sooner if credit metrics deteriorate.

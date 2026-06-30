@@ -1,0 +1,20 @@
+HIGH RISK COUNTERPARTY POLICY
+
+Applies when:
+PD is elevated, expected loss is high relative to requested line, liquidity is weak,
+or market stress materially affects the counterparty.
+
+Credit line treatment:
+Reduce requested credit line to the model-recommended limit.
+
+Maximum tenor:
+30 days.
+
+Required security:
+Standby Letter of Credit, bank guarantee, cash deposit, or other strong collateral.
+
+Approval:
+Credit Committee / senior credit approver.
+
+Review frequency:
+Monthly or after major market stress events.

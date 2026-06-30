@@ -1,0 +1,10 @@
+{
+  "structural_weight": 0.4,
+  "ml_weight": 0.6,
+  "brier_score": 0.21008371797672526,
+  "structural_only_brier_score": 0.29082597454078724,
+  "ml_only_brier_score": 0.24647531613272464,
+  "rows": 157029,
+  "calibration_method": "grid_search_min_brier_derived_structural_and_ml_pd",
+  "label_source_note": "Uses current PD training labels, which may include free-source proxy distress labels."
+}

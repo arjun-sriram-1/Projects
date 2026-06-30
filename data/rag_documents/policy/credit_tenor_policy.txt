@@ -1,0 +1,16 @@
+CREDIT TENOR POLICY
+
+Purpose:
+Set maximum fuel trade credit tenor after reviewing PD, LGD, EAD, expected loss,
+liquidity, leverage, market stress, and requested credit line.
+
+Risk Grade B / High Risk:
+Maximum 30 days unless fully cash-secured.
+
+Risk Grade BB / Medium Risk:
+Maximum 45 days, normally with standby letter of credit or bank guarantee.
+
+Risk Grade BBB or better / Lower Risk:
+Maximum 60-90 days if liquidity and debt service are adequate.
+
+Any requested tenor above the recommended tenor requires Credit Committee review.

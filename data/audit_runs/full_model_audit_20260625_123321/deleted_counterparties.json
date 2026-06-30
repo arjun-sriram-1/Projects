@@ -1,0 +1,162 @@
+[
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 275,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 5,
+      "financial_metrics_extracted": 5,
+      "uploaded_documents": 5
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 272,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 5,
+      "financial_metrics_extracted": 5,
+      "uploaded_documents": 5
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 271,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 5,
+      "financial_metrics_extracted": 5,
+      "uploaded_documents": 5
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 273,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 6,
+      "financial_metrics_extracted": 6,
+      "uploaded_documents": 6
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 274,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 6,
+      "financial_metrics_extracted": 6,
+      "uploaded_documents": 6
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 269,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 267,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 268,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 266,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 270,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  }
+]

@@ -1,0 +1,118 @@
+{
+  "version": "copilot_model_catalog_v1",
+  "purpose": "Canonical model and artifact descriptions for grounded copilot answers.",
+  "models": [
+    {
+      "model_id": "market_stress_pca",
+      "display_name": "Market Stress PCA",
+      "model_type": "PCA plus percentile scaling",
+      "output_fields": ["pc1_score", "stress_index", "pca_loadings", "explained_variance_ratio"],
+      "artifact_or_code": "api/market_data/stress_index.py",
+      "training_or_source_data": "market_prices table with Brent, WTI, jet fuel, jet crack spread, EIA inventories, OPEC production, volatility, equity, FX, rates, PMI, IATA passenger traffic, and freight proxies",
+      "data_status": "free_market_data_or_seeded_market_data",
+      "limitations": "PCA explains co-movement in market factors but does not prove causality. Missing components can reduce coverage."
+    },
+    {
+      "model_id": "market_regime_clustering",
+      "display_name": "Market Regime Detection",
+      "model_type": "cluster/regime assignment",
+      "output_fields": ["market_regime", "regime_probability", "regime_characteristics"],
+      "artifact_or_code": "api/market_data/regime_detection.py",
+      "training_or_source_data": "stress_index components and latest market feature values",
+      "data_status": "calculated_from_market_data",
+      "limitations": "Regime labels are analytical clusters, not externally observed market states."
+    },
+    {
+      "model_id": "merton_structural_pd",
+      "display_name": "Merton Structural PD",
+      "model_type": "structural credit model",
+      "output_fields": ["structural_pd", "distance_to_default"],
+      "artifact_or_code": "api/machine_learning/pd_model.py",
+      "training_or_source_data": "financial ratios, balance sheet values, market context, crack spread, supply/inventory signals, demand indicators, and modeled volatility inputs",
+      "data_status": "model_output_with_estimated_inputs",
+      "limitations": "Useful as a theoretical anchor but relies on estimated asset value and volatility for private/synthetic companies."
+    },
+    {
+      "model_id": "historical_ml_pd",
+      "display_name": "Historical ML PD",
+      "model_type": "trained ML probability model",
+      "output_fields": ["ml_pd"],
+      "artifact_or_code": "data/models/historical_pd_model.pkl",
+      "training_or_source_data": "free-source PD training dataset with proxy distress labels, financial ratios, and expanded market context columns when available",
+      "data_status": "trained_proxy_model",
+      "metrics": {
+        "auc": 0.5313629982441427,
+        "brier_score": 0.24920453665270412,
+        "log_loss": 0.691887549596315
+      },
+      "limitations": "Uses proxy distress labels, not internal observed bank defaults. AUC is modest, so it should be described as a realism improvement, not production-grade credit truth."
+    },
+    {
+      "model_id": "pd_blend",
+      "display_name": "Final PD Blend",
+      "model_type": "calibrated weighted blend",
+      "output_fields": ["final_pd"],
+      "artifact_or_code": "data/models/pd_blend_config.json",
+      "training_or_source_data": "grid search over structural and ML PD against proxy labels",
+      "data_status": "calibrated_proxy_model",
+      "weights": {
+        "structural_weight": 0.4,
+        "ml_weight": 0.6
+      },
+      "metrics": {
+        "brier_score": 0.21008371797672526,
+        "structural_only_brier_score": 0.29082597454078724,
+        "ml_only_brier_score": 0.24647531613272464
+      },
+      "limitations": "Blend improves Brier score versus each standalone proxy, but labels remain proxy distress labels."
+    },
+    {
+      "model_id": "financial_trend_overlay",
+      "display_name": "Financial History Trend Overlay",
+      "model_type": "capped deterministic overlay",
+      "output_fields": ["risk_score", "pd_multiplier", "asset_volatility_addon", "lgd_addon", "liquidity_score"],
+      "artifact_or_code": "api/financials/trends.py",
+      "training_or_source_data": "user-entered or uploaded multi-period financial metrics and calculated ratios",
+      "data_status": "calculated_from_user_financial_history",
+      "limitations": "Neutral when fewer than two comparable periods are available. It adjusts model inputs/outputs transparently; it does not replace Merton, ML PD, LGD, EAD, or EL formulas."
+    },
+    {
+      "model_id": "historical_lgd",
+      "display_name": "Historical LGD Model",
+      "model_type": "trained severity model",
+      "output_fields": ["predicted_lgd"],
+      "artifact_or_code": "data/models/historical_lgd_model.pkl",
+      "training_or_source_data": "5000-row synthetic/proxy LGD dataset",
+      "data_status": "trained_proxy_model",
+      "metrics": {
+        "mae": 0.11324915203637602,
+        "rmse": 0.14647786377126745
+      },
+      "limitations": "Uses synthetic/proxy loss severity data, so it supports explainability but is not equivalent to real recovery history."
+    },
+    {
+      "model_id": "calibrated_ead",
+      "display_name": "Calibrated EAD Model",
+      "model_type": "trained exposure model",
+      "output_fields": ["exposure_at_default", "expected_drawdown", "invoice_exposure"],
+      "artifact_or_code": "data/models/calibrated_ead_model.pkl",
+      "training_or_source_data": "5000-row synthetic/proxy trade exposure dataset",
+      "data_status": "trained_proxy_model",
+      "metrics": {
+        "mae": 378275.131618208,
+        "rmse": 1133796.3319760065
+      },
+      "limitations": "Uses synthetic/proxy drawdown and exposure history, not internal bank utilization/default observations."
+    },
+    {
+      "model_id": "credit_decision_policy_engine",
+      "display_name": "Credit Decision Policy Engine",
+      "model_type": "deterministic policy rules",
+      "output_fields": ["recommended_credit_limit", "recommended_tenor_days", "recommended_security", "risk_grade", "approval_status", "policy_score", "limit_haircut"],
+      "artifact_or_code": "api/credit_decision/engine.py",
+      "training_or_source_data": "PD, LGD, EAD, scenario loss, financial ratios, expanded market stress, collateral, tenor, and exposure terms",
+      "data_status": "deterministic_policy_output",
+      "limitations": "Transparent and auditable, but policy thresholds are rules rather than learned from internal committee decisions."
+    }
+  ]
+}

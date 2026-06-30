@@ -1,0 +1,105 @@
+{
+  "version": "copilot_pipeline_graph_v1",
+  "purpose": "High-level dependency graph for explaining how a counterparty flows through the project.",
+  "stages": [
+    {
+      "stage_id": "counterparty_setup",
+      "name": "Counterparty Setup",
+      "inputs": ["counterparty_name", "counterparty_type", "country"],
+      "outputs": ["counterparty_id"],
+      "source_tables": ["counterparties_master"],
+      "source_files": ["api/rag/grounded_context.py"],
+      "explanation": "The system identifies the company being assessed and uses that ID to retrieve financials, ratios, model outputs, exposures, and recommendations."
+    },
+    {
+      "stage_id": "financial_metrics",
+      "name": "Financial Metrics",
+      "inputs": ["manual_entry", "uploaded_documents"],
+      "outputs": ["revenue", "ebitda", "ebit", "net_income", "cash_and_equivalents", "current_assets", "total_assets", "current_liabilities", "total_debt", "total_liabilities", "shareholders_equity", "interest_expense", "operating_cash_flow"],
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/documents/service.py", "api/financials/service.py"],
+      "explanation": "Raw financial line items are stored first. The ratios and models are built on top of these line items."
+    },
+    {
+      "stage_id": "financial_ratios",
+      "name": "Financial Ratios",
+      "inputs": ["financial_metrics_extracted"],
+      "outputs": ["current_ratio", "quick_ratio", "cash_ratio", "working_capital", "debt_to_equity", "debt_to_ebitda", "liabilities_to_assets", "interest_coverage", "operating_margin", "net_margin", "return_on_assets", "return_on_equity"],
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "explanation": "Financial line items are converted into liquidity, leverage, coverage, and profitability ratios."
+    },
+    {
+      "stage_id": "market_data",
+      "name": "Market Data",
+      "inputs": ["brent_oil", "crude_oil", "heating_oil_proxy", "jet_fuel_proxy", "jet_crack_spread", "eia_crude_inventories", "opec_production", "vix", "sp500", "dxy", "rates", "cpi", "freight_proxy", "global_pmi", "pmi", "iata_passenger_traffic"],
+      "outputs": ["market_prices"],
+      "source_tables": ["market_prices"],
+      "source_files": ["api/market_data/market_data.py", "api/market_data/external_providers.py"],
+      "explanation": "Market prices and macro proxies provide external context for fuel, FX, volatility, rates, and demand conditions."
+    },
+    {
+      "stage_id": "stress_index",
+      "name": "PCA Market Stress",
+      "inputs": ["market_prices"],
+      "outputs": ["pc1_score", "stress_index", "pca_loadings", "explained_variance_ratio", "top_positive_drivers", "top_negative_drivers"],
+      "source_tables": ["stress_index_history"],
+      "source_files": ["api/market_data/stress_index.py"],
+      "explanation": "Market components are compressed into PC1 using PCA when possible, then scaled into a 0-100 stress index."
+    },
+    {
+      "stage_id": "market_regime",
+      "name": "Market Regime",
+      "inputs": ["stress_index", "market_feature_values"],
+      "outputs": ["market_regime", "regime_probability", "regime_characteristics"],
+      "source_tables": ["market_regime_history"],
+      "source_files": ["api/market_data/regime_detection.py"],
+      "explanation": "The latest market state is clustered into a regime label that the copilot can use for explanation."
+    },
+    {
+      "stage_id": "pd_model",
+      "name": "PD Model",
+      "inputs": ["financial_ratios", "financial_trend_features", "market_stress_index", "market_regime", "vulnerability_scores", "jet_crack_spread", "eia_crude_inventories", "opec_production", "global_pmi", "iata_passenger_traffic"],
+      "outputs": ["structural_pd", "ml_pd", "final_pd", "distance_to_default", "model_disagreement", "classification_label"],
+      "source_tables": ["pd_model_predictions"],
+      "source_files": ["api/machine_learning/pd_model.py", "api/financials/trends.py", "data/models/historical_pd_model.pkl", "data/models/pd_blend_config.json"],
+      "explanation": "The project estimates default risk using a Merton structural model and an ML/proxy model, then blends them into final PD. Multi-period financial history acts as a capped overlay when available."
+    },
+    {
+      "stage_id": "loss_model",
+      "name": "LGD/EAD/Expected Loss",
+      "inputs": ["final_pd", "trade_exposures", "collateral_terms", "financial_trend_features", "historical_lgd_model.pkl", "calibrated_ead_model.pkl"],
+      "outputs": ["predicted_lgd", "exposure_at_default", "expected_loss", "collateral_strength", "expected_drawdown", "invoice_exposure"],
+      "source_tables": ["loss_estimates"],
+      "source_files": ["api/machine_learning/loss_model.py", "api/financials/trends.py"],
+      "explanation": "The loss model estimates severity, exposure, and expected loss using PD x LGD x EAD. Financial history can provide a liquidity score and capped LGD add-on."
+    },
+    {
+      "stage_id": "scenario_and_simulation",
+      "name": "Scenario And Simulation",
+      "inputs": ["pd", "lgd", "ead", "stress_index", "market_regime", "scenario_multiplier_config.json"],
+      "outputs": ["scenario_expected_loss", "var_95", "var_99", "expected_shortfall_95", "expected_shortfall_99", "worst_case_loss"],
+      "source_tables": ["scenario_results", "simulation_results"],
+      "source_files": ["api/portfolio_risk/scenario_generator.py", "api/portfolio_risk/monte_carlo.py", "data/models/scenario_multiplier_config.json"],
+      "explanation": "Scenario and Monte Carlo outputs add downside-risk context beyond average expected loss."
+    },
+    {
+      "stage_id": "credit_decision",
+      "name": "Credit Decision",
+      "inputs": ["final_pd", "predicted_lgd", "exposure_at_default", "expected_loss", "scenario_expected_loss", "financial_ratios", "market_stress_index", "trade_exposure_terms"],
+      "outputs": ["recommended_credit_limit", "recommended_tenor_days", "recommended_security", "risk_grade", "approval_status", "policy_score", "limit_haircut"],
+      "source_tables": ["credit_recommendations"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "explanation": "The decision engine applies transparent policy rules and haircuts to convert model risk into credit terms."
+    },
+    {
+      "stage_id": "copilot_answer",
+      "name": "Copilot Answer",
+      "inputs": ["user_question", "visible_metrics", "selected_counterparty_context", "field_catalog", "formula_catalog", "model_catalog", "pipeline_graph"],
+      "outputs": ["answer", "sources", "traceability_notes"],
+      "source_tables": ["all_relevant_context_tables"],
+      "source_files": ["api/rag/router.py", "api/rag/grounded_context.py", "api/rag/agents/master_router.py"],
+      "explanation": "The copilot should explain stored outputs and formulas using grounded context. It should not create new approvals or unsupported numbers."
+    }
+  ]
+}

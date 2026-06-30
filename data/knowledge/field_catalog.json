@@ -1,0 +1,398 @@
+{
+  "version": "copilot_field_catalog_v1",
+  "purpose": "Canonical field explanations for the project copilot. These entries are used to ground answers about dashboard values, SQL fields, model outputs, and interview explanations.",
+  "fields": [
+    {
+      "field": "counterparty_name",
+      "display_name": "Counterparty Name",
+      "meaning": "The company or synthetic entity being assessed for trade credit.",
+      "unit": "text",
+      "source_tables": ["counterparties_master"],
+      "source_files": ["api/rag/grounded_context.py"],
+      "data_status": "stored_or_synthetic",
+      "interview_explanation": "This is the company being assessed. All financials, model outputs, and credit recommendations are tied back to this counterparty."
+    },
+    {
+      "field": "counterparty_type",
+      "display_name": "Counterparty Type",
+      "meaning": "Business category for the counterparty, such as airline or fuel buyer.",
+      "unit": "category",
+      "source_tables": ["counterparties_master"],
+      "source_files": ["api/rag/grounded_context.py"],
+      "data_status": "stored_or_synthetic",
+      "interview_explanation": "This helps frame the risk profile because different buyer types have different exposure to fuel prices, demand cycles, and working-capital pressure."
+    },
+    {
+      "field": "country",
+      "display_name": "Country",
+      "meaning": "The country associated with the counterparty.",
+      "unit": "country name",
+      "source_tables": ["counterparties_master"],
+      "source_files": ["api/rag/grounded_context.py"],
+      "data_status": "stored_or_synthetic",
+      "interview_explanation": "Country context is useful for explaining macro, FX, legal recovery, and trade-flow risk."
+    },
+    {
+      "field": "revenue",
+      "display_name": "Revenue",
+      "meaning": "Top-line sales extracted or manually entered from financial statements.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py", "api/rag/grounded_context.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "Revenue gives scale. It helps interpret whether the requested credit line is reasonable relative to the size of the business."
+    },
+    {
+      "field": "ebitda",
+      "display_name": "EBITDA",
+      "meaning": "Earnings before interest, taxes, depreciation, and amortization.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "EBITDA is used as a cash-earnings proxy. It supports leverage calculations like Debt/EBITDA."
+    },
+    {
+      "field": "ebit",
+      "display_name": "EBIT / Operating Profit",
+      "meaning": "Operating profit before interest and taxes.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py", "api/financials/service.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "EBIT is used for interest coverage and operating margin. If EBIT is missing, the model cannot properly assess debt-service capacity."
+    },
+    {
+      "field": "accounts_receivable",
+      "display_name": "Accounts Receivable",
+      "meaning": "Amounts owed to the company by customers.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py", "api/financials/service.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "Receivables are part of quick assets. They help separate true quick liquidity from cash-only liquidity."
+    },
+    {
+      "field": "inventory",
+      "display_name": "Inventory",
+      "meaning": "Inventory or stock held on the balance sheet.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py", "api/financials/service.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "Inventory is excluded from quick liquidity when quick assets are derived as current assets minus inventory."
+    },
+    {
+      "field": "total_debt",
+      "display_name": "Total Debt",
+      "meaning": "Debt obligations reported or entered for the counterparty.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "Debt is central to credit risk because high debt increases fixed obligations and can reduce repayment flexibility."
+    },
+    {
+      "field": "shareholders_equity",
+      "display_name": "Shareholders Equity",
+      "meaning": "Book equity after liabilities are deducted from assets.",
+      "unit": "currency amount",
+      "source_tables": ["financial_metrics_extracted"],
+      "source_files": ["api/shared/financial_ratios.py", "api/machine_learning/pd_model.py"],
+      "data_status": "extracted_manual_or_synthetic",
+      "interview_explanation": "Negative equity or liabilities exceeding assets can trigger PD floors because it signals balance-sheet distress."
+    },
+    {
+      "field": "current_ratio",
+      "display_name": "Current Ratio",
+      "meaning": "Current assets divided by current liabilities.",
+      "unit": "ratio",
+      "formula_id": "current_ratio",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Current ratio measures short-term liquidity. Lower liquidity can weaken repayment capacity."
+    },
+    {
+      "field": "quick_ratio",
+      "display_name": "Quick Ratio",
+      "meaning": "More conservative short-term liquidity ratio that excludes less liquid current assets where available.",
+      "unit": "ratio",
+      "formula_id": "quick_ratio",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Quick ratio is a tighter liquidity check than current ratio."
+    },
+    {
+      "field": "cash_ratio",
+      "display_name": "Cash Ratio",
+      "meaning": "Cash and equivalents divided by current liabilities.",
+      "unit": "ratio",
+      "formula_id": "cash_ratio",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Cash ratio shows how much near-cash coverage exists for short-term liabilities."
+    },
+    {
+      "field": "debt_to_equity",
+      "display_name": "Debt To Equity",
+      "meaning": "Total debt divided by shareholders equity.",
+      "unit": "ratio",
+      "formula_id": "debt_to_equity",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py", "api/machine_learning/pd_model.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Debt/equity measures leverage. Higher leverage usually increases PD pressure."
+    },
+    {
+      "field": "debt_to_ebitda",
+      "display_name": "Debt To EBITDA",
+      "meaning": "Total debt divided by EBITDA.",
+      "unit": "ratio",
+      "formula_id": "debt_to_ebitda",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py", "api/credit_decision/engine.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Debt/EBITDA is a core leverage measure. Higher values reduce credit headroom."
+    },
+    {
+      "field": "interest_coverage",
+      "display_name": "Interest Coverage",
+      "meaning": "EBIT divided by interest expense.",
+      "unit": "ratio",
+      "formula_id": "interest_coverage",
+      "source_tables": ["financial_ratios"],
+      "source_files": ["api/shared/financial_ratios.py", "api/credit_decision/engine.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Interest coverage measures debt-service capacity. Weak coverage increases repayment risk."
+    },
+    {
+      "field": "stress_index",
+      "display_name": "Market Stress Index",
+      "meaning": "A 0-100 market stress score built from market components using PCA when enough data is available.",
+      "unit": "0-100 score",
+      "formula_id": "pca_stress_index",
+      "source_tables": ["stress_index_history"],
+      "source_files": ["api/market_data/stress_index.py"],
+      "data_status": "calculated_from_market_data",
+      "interview_explanation": "The stress index compresses multiple market indicators into one stress score. Higher stress can raise PD pressure, scenario losses, and tighter credit terms."
+    },
+    {
+      "field": "pc1_score",
+      "display_name": "PCA PC1 Score",
+      "meaning": "The first principal component score from standardized market stress components.",
+      "unit": "component score",
+      "formula_id": "pca_pc1",
+      "source_tables": ["stress_index_history"],
+      "source_files": ["api/market_data/stress_index.py"],
+      "data_status": "calculated_from_market_data",
+      "interview_explanation": "PC1 is the main combined market factor. The project scales it into the 0-100 stress index."
+    },
+    {
+      "field": "pca_loadings",
+      "display_name": "PCA Loadings",
+      "meaning": "Weights showing which market components drive the first principal component.",
+      "unit": "component weights",
+      "formula_id": "pca_pc1",
+      "source_tables": ["stress_index_history"],
+      "source_files": ["api/market_data/stress_index.py"],
+      "data_status": "calculated_from_market_data",
+      "interview_explanation": "Loadings explain which market factors are pushing the stress index up or down."
+    },
+    {
+      "field": "market_regime",
+      "display_name": "Market Regime",
+      "meaning": "Cluster-based market regime label inferred from stress and market feature values.",
+      "unit": "category",
+      "source_tables": ["market_regime_history", "pd_model_predictions"],
+      "source_files": ["api/market_data/regime_detection.py"],
+      "data_status": "calculated_from_market_data",
+      "interview_explanation": "The regime describes the market backdrop, for example normal conditions or commodity stress."
+    },
+    {
+      "field": "structural_pd",
+      "display_name": "Structural PD",
+      "meaning": "Probability of default from the Merton-style structural credit model.",
+      "unit": "decimal probability",
+      "formula_id": "merton_structural_pd",
+      "source_tables": ["pd_model_predictions"],
+      "source_files": ["api/machine_learning/pd_model.py", "api/structural_credit/merton_model.py"],
+      "data_status": "model_output",
+      "interview_explanation": "Structural PD estimates default risk from asset value, debt barrier, volatility, risk-free rate, and time horizon."
+    },
+    {
+      "field": "ml_pd",
+      "display_name": "ML PD",
+      "meaning": "Machine-learning/proxy PD cross-check based on financial ratios, market stress, and vulnerability features.",
+      "unit": "decimal probability",
+      "formula_id": "ml_pd_proxy",
+      "source_tables": ["pd_model_predictions"],
+      "source_files": ["api/machine_learning/pd_model.py", "data/models/historical_pd_model.pkl"],
+      "data_status": "trained_proxy_model_output",
+      "interview_explanation": "ML PD is a data-driven cross-check. It uses free-source proxy distress labels, so it improves realism but is not the same as internal bank default history."
+    },
+    {
+      "field": "final_pd",
+      "display_name": "Final PD",
+      "meaning": "Final blended probability of default used downstream by loss and credit recommendation logic.",
+      "unit": "decimal probability",
+      "formula_id": "final_pd_blend",
+      "source_tables": ["pd_model_predictions", "loss_estimates", "credit_recommendations"],
+      "source_files": ["api/machine_learning/pd_model.py", "data/models/pd_blend_config.json"],
+      "data_status": "calibrated_blended_model_output",
+      "interview_explanation": "Final PD blends structural PD and ML PD. In the current trained config, the blend uses 40% structural and 60% ML."
+    },
+    {
+      "field": "distance_to_default",
+      "display_name": "Distance To Default",
+      "meaning": "How far the estimated asset value is from the default barrier in volatility-adjusted terms.",
+      "unit": "standard deviations",
+      "formula_id": "merton_distance_to_default",
+      "source_tables": ["pd_model_predictions"],
+      "source_files": ["api/machine_learning/pd_model.py", "api/structural_credit/distance_to_default.py"],
+      "data_status": "model_output",
+      "interview_explanation": "Lower distance to default means the firm is closer to breaching its debt barrier, so PD rises."
+    },
+    {
+      "field": "predicted_lgd",
+      "display_name": "Predicted LGD",
+      "meaning": "Estimated percentage of exposure lost if the counterparty defaults.",
+      "unit": "decimal percentage",
+      "formula_id": "lgd_blend",
+      "source_tables": ["loss_estimates", "credit_recommendations"],
+      "source_files": ["api/machine_learning/loss_model.py", "data/models/historical_lgd_model.pkl"],
+      "data_status": "collateral_logic_plus_trained_proxy_model",
+      "interview_explanation": "LGD captures severity after default. Collateral, letters of credit, guarantees, and deposits reduce it."
+    },
+    {
+      "field": "exposure_at_default",
+      "display_name": "Exposure At Default",
+      "meaning": "Estimated amount outstanding if default occurs.",
+      "unit": "currency amount",
+      "formula_id": "ead_blend",
+      "source_tables": ["loss_estimates", "credit_recommendations"],
+      "source_files": ["api/machine_learning/loss_model.py", "data/models/calibrated_ead_model.pkl"],
+      "data_status": "trade_logic_plus_calibrated_proxy_model",
+      "interview_explanation": "EAD estimates how much of the credit line or invoices could be exposed at default."
+    },
+    {
+      "field": "expected_loss",
+      "display_name": "Expected Loss",
+      "meaning": "Average modeled credit loss in currency terms.",
+      "unit": "currency amount",
+      "formula_id": "expected_loss",
+      "source_tables": ["loss_estimates", "credit_recommendations", "simulation_results"],
+      "source_files": ["api/machine_learning/loss_model.py", "api/credit_decision/engine.py"],
+      "data_status": "calculated",
+      "interview_explanation": "Expected loss translates default probability, loss severity, and exposure into a dollar risk estimate."
+    },
+    {
+      "field": "recommended_credit_limit",
+      "display_name": "Recommended Credit Limit",
+      "meaning": "Risk-adjusted credit line suggested by the credit decision engine.",
+      "unit": "currency amount",
+      "formula_id": "recommended_limit",
+      "source_tables": ["credit_recommendations"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "data_status": "policy_engine_output",
+      "interview_explanation": "The recommended limit is the requested or available base limit reduced by policy haircuts from PD, LGD, stress, leverage, tenor, collateral, and tail risk."
+    },
+    {
+      "field": "recommended_tenor_days",
+      "display_name": "Recommended Tenor",
+      "meaning": "Recommended credit tenor in days.",
+      "unit": "days",
+      "formula_id": "recommended_tenor",
+      "source_tables": ["credit_recommendations"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "data_status": "policy_engine_output",
+      "interview_explanation": "Riskier counterparties receive shorter tenors so receivables do not build up too far."
+    },
+    {
+      "field": "recommended_security",
+      "display_name": "Recommended Security",
+      "meaning": "Required collateral/security support for the recommendation.",
+      "unit": "text",
+      "formula_id": "recommended_security",
+      "source_tables": ["credit_recommendations"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "data_status": "policy_engine_output",
+      "interview_explanation": "Security requirements reduce LGD and protect against downside if payment performance weakens."
+    },
+    {
+      "field": "risk_grade",
+      "display_name": "Risk Grade",
+      "meaning": "Internal proxy grade mapped from PD bands.",
+      "unit": "rating label",
+      "formula_id": "risk_grade_mapping",
+      "source_tables": ["credit_recommendations", "pd_model_predictions"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "data_status": "calculated_policy_label",
+      "interview_explanation": "Risk grade turns numeric PD into an easier internal credit label. It is not an external agency rating."
+    },
+    {
+      "field": "approval_status",
+      "display_name": "Approval Status",
+      "meaning": "Final stored credit committee decision label from the policy engine.",
+      "unit": "decision label",
+      "formula_id": "approval_status",
+      "source_tables": ["credit_recommendations"],
+      "source_files": ["api/credit_decision/engine.py"],
+      "data_status": "policy_engine_output",
+      "interview_explanation": "Approval status summarizes the policy result after the model calculates risk grade, score, haircut, limit, tenor, and security."
+    },
+    {
+      "field": "jet_crack_spread",
+      "display_name": "Jet Crack Spread",
+      "meaning": "Jet fuel price converted to dollars per barrel minus crude price. It shows whether aviation fuel is becoming expensive relative to crude.",
+      "unit": "usd_per_barrel",
+      "formula_id": "jet_crack_spread",
+      "source_tables": ["market_prices"],
+      "source_files": ["api/market_data/external_providers.py", "api/market_data/stress_index.py"],
+      "data_status": "calculated_from_market_data",
+      "interview_explanation": "A wider crack spread can pressure airline margins and working capital, which can increase PD pressure and tighten credit terms."
+    },
+    {
+      "field": "eia_crude_inventories",
+      "display_name": "EIA Crude Inventories",
+      "meaning": "Stored crude inventory level used as a supply-demand signal.",
+      "unit": "thousand barrels",
+      "source_tables": ["market_prices", "macro_indicators"],
+      "source_files": ["api/market_data/external_providers.py", "api/market_data/stress_index.py"],
+      "data_status": "free_source_market_data",
+      "interview_explanation": "Inventory builds can indicate weaker demand or excess supply; draws can tighten fuel markets. The project converts changes into a PCA stress component."
+    },
+    {
+      "field": "opec_production",
+      "display_name": "OPEC Production",
+      "meaning": "OPEC production level staged from free CSV downloads when available.",
+      "unit": "production level",
+      "source_tables": ["market_prices", "macro_indicators"],
+      "source_files": ["api/market_data/external_providers.py", "api/market_data/stress_index.py"],
+      "data_status": "staged_free_csv",
+      "interview_explanation": "Falling OPEC production can imply supply tightness and higher fuel-cost pressure, so it feeds the market stress layer."
+    },
+    {
+      "field": "global_pmi",
+      "display_name": "Global PMI",
+      "meaning": "Business activity signal, staged directly or proxied by available PMI data.",
+      "unit": "index",
+      "source_tables": ["market_prices", "macro_indicators"],
+      "source_files": ["api/market_data/external_providers.py", "api/market_data/stress_index.py"],
+      "data_status": "staged_or_proxy_market_data",
+      "interview_explanation": "Weak PMI reduces demand visibility and can raise macro vulnerability in PD, scenario, and credit decision explanations."
+    },
+    {
+      "field": "iata_passenger_traffic",
+      "display_name": "IATA Passenger Traffic",
+      "meaning": "Air passenger demand signal staged from free CSV downloads when available.",
+      "unit": "index",
+      "source_tables": ["market_prices", "macro_indicators"],
+      "source_files": ["api/market_data/external_providers.py", "api/market_data/stress_index.py"],
+      "data_status": "staged_free_csv",
+      "interview_explanation": "Falling passenger traffic directly matters for airline counterparties because weaker demand can pressure revenue, liquidity, and repayment capacity."
+    }
+  ]
+}

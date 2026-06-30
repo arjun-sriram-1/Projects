@@ -1,0 +1,16 @@
+{
+  "pd_stress_coefficient": 0.03,
+  "lgd_stress_coefficient": 0.01,
+  "ead_commodity_coefficient": 0.005,
+  "ead_commodity_cap": 0.15,
+  "calibration_method": "historical_market_stress_proxy_calibration",
+  "calibration_notes": [
+    "pd_stress_coefficient calibrated from high/low market-stress default-label rates",
+    "default correlation calibrated from year-level default-label clustering",
+    "lgd_stress_coefficient calibrated from high/low stress LGD observations",
+    "ead commodity coefficient calibrated from high/low commodity-price utilization"
+  ],
+  "pd_rows": 157029,
+  "lgd_rows": 5000,
+  "ead_rows": 5000
+}

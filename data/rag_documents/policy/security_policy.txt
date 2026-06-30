@@ -1,0 +1,24 @@
+SECURITY POLICY
+
+Purpose:
+Define acceptable protection when the requested fuel credit line creates
+unacceptable expected loss, high LGD, weak liquidity, or adverse market exposure.
+
+Acceptable security types:
+1. Standby Letter of Credit
+2. Bank Guarantee
+3. Parent Company Guarantee
+4. Cash Deposit
+5. Secured collateral where enforceable
+
+Preferred order:
+Standby Letter of Credit
+Bank Guarantee
+Cash Deposit
+Parent Guarantee
+Secured collateral
+
+Security should be required when:
+Recommended limit is below requested limit, LGD is elevated, expected loss is
+above policy appetite, tenor is longer than recommended, or commodity/FX stress
+materially affects the counterparty.

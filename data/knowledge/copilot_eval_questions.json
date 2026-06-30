@@ -1,0 +1,117 @@
+{
+  "version": "copilot_eval_questions_v1",
+  "purpose": "Regression questions for the project-aware copilot. These cases verify routing, formulas, market/PCA tracing, source grounding, and honest model-limit language without requiring paid APIs.",
+  "default_use_llm": false,
+  "cases": [
+    {
+      "id": "expected_loss_formula",
+      "question": "How is expected loss calculated?",
+      "values": {
+        "probability_of_default": 0.05,
+        "loss_given_default": 0.4,
+        "exposure_at_default": 1000000
+      },
+      "expect": {
+        "route_intent": "formula_trace",
+        "trace_formula_id": "expected_loss",
+        "trace_result": 20000,
+        "answer_contains": ["expected loss", "PD", "LGD", "EAD"],
+        "source_contains": ["formula_catalog"]
+      }
+    },
+    {
+      "id": "final_pd_blend",
+      "question": "How is final PD calculated from structural PD and ML PD?",
+      "values": {
+        "structural_pd": 0.02,
+        "ml_pd": 0.1
+      },
+      "expect": {
+        "route_intent": "formula_trace",
+        "trace_formula_id": "final_pd_blend",
+        "trace_result": 0.068,
+        "answer_contains": ["final", "PD", "structural", "ML"],
+        "source_contains": ["pd_blend", "field_catalog"]
+      }
+    },
+    {
+      "id": "pca_market_stress",
+      "question": "How does PCA market stress affect final PD?",
+      "values": {
+        "stress_index": 60,
+        "pc1_score": 1.2,
+        "pca_loadings": {
+          "brent_return_zscore": 0.5,
+          "vix_zscore": 0.3
+        },
+        "component_values": {
+          "brent_return_zscore": 1.4,
+          "vix_zscore": 0.2
+        }
+      },
+      "expect": {
+        "route_intent": "market_pca_explanation",
+        "market_trace_required": true,
+        "answer_contains": ["PCA", "stress", "PD"],
+        "source_contains": ["stress_index"]
+      }
+    },
+    {
+      "id": "data_lineage_final_pd",
+      "question": "Where does final PD come from?",
+      "expect": {
+        "route_intent": "data_lineage",
+        "answer_contains": ["final", "PD"],
+        "source_contains": ["field_catalog", "pipeline_graph"]
+      }
+    },
+    {
+      "id": "model_realism_limits",
+      "question": "Which models use real, proxy, synthetic, or calibrated data?",
+      "expect": {
+        "route_intent": "model_explanation",
+        "answer_contains": ["proxy", "synthetic"],
+        "source_contains": ["model_catalog", "training_summary"]
+      }
+    },
+    {
+      "id": "interview_flow",
+      "question": "Explain this project to an interviewer from data input to final recommendation.",
+      "expect": {
+        "route_intent": "interview_explanation",
+        "style": "interview",
+        "answer_contains": ["auditable", "model", "decision"],
+        "source_contains": ["PROJECT_INTERVIEW_GUIDE", "pipeline_graph"]
+      }
+    },
+    {
+      "id": "recommended_limit",
+      "question": "Explain how the recommended credit limit is calculated.",
+      "values": {
+        "base_limit": 10000000,
+        "limit_haircut": 0.19
+      },
+      "expect": {
+        "route_intent": "formula_trace",
+        "trace_formula_id": "recommended_limit",
+        "trace_result": 8100000,
+        "answer_contains": ["limit", "haircut"],
+        "source_contains": ["credit_decision", "formula_catalog"]
+      }
+    },
+    {
+      "id": "risk_grade_mapping",
+      "question": "How is risk grade mapped from PD?",
+      "values": {
+        "final_pd": 0.048
+      },
+      "expect": {
+        "route_intent": "formula_trace",
+        "trace_formula_id": "risk_grade_mapping",
+        "trace_result": "BB",
+        "answer_contains": ["risk", "grade", "PD"],
+        "source_contains": ["formula_catalog"]
+      }
+    }
+  ]
+}

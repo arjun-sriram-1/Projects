@@ -1,0 +1,226 @@
+[
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 264,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 6,
+      "trade_exposures": 6,
+      "pd_model_predictions": 6,
+      "historical_training_dataset": 0,
+      "financial_ratios": 2,
+      "financial_metrics_extracted": 2,
+      "uploaded_documents": 2
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 238,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 0,
+      "loss_estimates": 0,
+      "trade_exposures": 0,
+      "pd_model_predictions": 0,
+      "historical_training_dataset": 0,
+      "financial_ratios": 0,
+      "financial_metrics_extracted": 0,
+      "uploaded_documents": 0
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 253,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 2,
+      "loss_estimates": 2,
+      "trade_exposures": 2,
+      "pd_model_predictions": 2,
+      "historical_training_dataset": 0,
+      "financial_ratios": 1,
+      "financial_metrics_extracted": 1,
+      "uploaded_documents": 1
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 265,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 1,
+      "loss_estimates": 1,
+      "trade_exposures": 1,
+      "pd_model_predictions": 1,
+      "historical_training_dataset": 0,
+      "financial_ratios": 3,
+      "financial_metrics_extracted": 3,
+      "uploaded_documents": 3
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 259,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 258,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 257,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 260,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 256,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 263,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 255,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 254,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 7,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 261,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  },
+  {
+    "message": "Counterparty and related stored data deleted.",
+    "counterparty_id": 262,
+    "deleted_files": 0,
+    "deleted_rows": {
+      "ai_credit_memos": 0,
+      "credit_recommendations": 6,
+      "loss_estimates": 7,
+      "trade_exposures": 7,
+      "pd_model_predictions": 7,
+      "historical_training_dataset": 0,
+      "financial_ratios": 7,
+      "financial_metrics_extracted": 7,
+      "uploaded_documents": 7
+    }
+  }
+]

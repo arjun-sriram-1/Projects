@@ -1,0 +1,21 @@
+MEDIUM RISK COUNTERPARTY POLICY
+
+Applies when:
+The counterparty has moderate PD, acceptable but not strong liquidity, manageable
+leverage, and no severe market stress override.
+
+Credit line treatment:
+Approve the requested line only if expected loss and policy score remain within
+thresholds. Otherwise reduce the limit to the model-recommended line.
+
+Maximum tenor:
+45-60 days depending on liquidity and debt service.
+
+Required security:
+Corporate guarantee, standby LC, or bank guarantee when expected loss is elevated.
+
+Approval:
+Credit manager or committee depending on exposure size.
+
+Review frequency:
+Quarterly or after a material change in fuel, FX, or macro stress.

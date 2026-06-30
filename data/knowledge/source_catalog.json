@@ -1,0 +1,114 @@
+{
+  "version": "copilot_source_catalog_v1",
+  "purpose": "Canonical source map for copilot citations and data provenance.",
+  "sources": [
+    {
+      "source_id": "counterparties_master",
+      "type": "sql_table",
+      "contains": ["counterparty identity", "type", "country"],
+      "used_by": ["copilot context", "credit workflow"]
+    },
+    {
+      "source_id": "financial_metrics_extracted",
+      "type": "sql_table",
+      "contains": ["income statement values", "balance sheet values", "cash flow values", "extraction metadata"],
+      "used_by": ["financial ratios", "PD model", "copilot context"]
+    },
+    {
+      "source_id": "financial_ratios",
+      "type": "sql_table",
+      "contains": ["liquidity ratios", "leverage ratios", "coverage ratios", "profitability ratios"],
+      "used_by": ["PD model", "credit decision", "copilot context"]
+    },
+    {
+      "source_id": "financial_trend_features",
+      "type": "calculated_context",
+      "contains": ["revenue CAGR", "margin trend", "leverage trend", "coverage trend", "liquidity trend", "trend overlay multipliers"],
+      "used_by": ["PD model overlay", "LGD liquidity overlay", "copilot context"]
+    },
+    {
+      "source_id": "pd_model_predictions",
+      "type": "sql_table",
+      "contains": ["structural PD", "ML PD", "final PD", "distance to default", "market stress", "feature contributions"],
+      "used_by": ["loss model", "credit decision", "copilot context"]
+    },
+    {
+      "source_id": "loss_estimates",
+      "type": "sql_table",
+      "contains": ["probability of default", "predicted LGD", "EAD", "expected loss", "collateral strength", "drawdown"],
+      "used_by": ["credit decision", "copilot context"]
+    },
+    {
+      "source_id": "trade_exposures",
+      "type": "sql_table",
+      "contains": ["requested credit limit", "approved credit limit", "receivables", "tenor", "collateral", "invoice exposure"],
+      "used_by": ["loss model", "credit decision", "copilot context"]
+    },
+    {
+      "source_id": "credit_recommendations",
+      "type": "sql_table",
+      "contains": ["recommended limit", "tenor", "security", "risk grade", "approval status", "policy score", "risk drivers"],
+      "used_by": ["frontend decision UI", "copilot context"]
+    },
+    {
+      "source_id": "stress_index_history",
+      "type": "sql_table",
+      "contains": ["stress index", "PC1 score", "PCA loadings", "explained variance", "stress drivers"],
+      "used_by": ["PD model", "scenario logic", "copilot context"]
+    },
+    {
+      "source_id": "market_regime_history",
+      "type": "sql_table",
+      "contains": ["regime ID", "regime label", "regime probability", "feature values"],
+      "used_by": ["PD model", "scenario explanation", "copilot context"]
+    },
+    {
+      "source_id": "market_prices",
+      "type": "sql_table",
+      "contains": ["latest market prices", "returns", "rolling volatility", "asset names", "tickers"],
+      "used_by": ["stress index", "market regime", "copilot context"]
+    },
+    {
+      "source_id": "pd_blend_config",
+      "type": "model_config",
+      "path": "data/models/pd_blend_config.json",
+      "contains": ["structural weight", "ML weight", "Brier score", "calibration method"],
+      "used_by": ["final PD explanation"]
+    },
+    {
+      "source_id": "scenario_multiplier_config",
+      "type": "model_config",
+      "path": "data/models/scenario_multiplier_config.json",
+      "contains": ["PD stress coefficient", "LGD stress coefficient", "EAD commodity coefficient", "calibration notes"],
+      "used_by": ["scenario explanation", "stress impact explanation"]
+    },
+    {
+      "source_id": "training_summary",
+      "type": "report",
+      "path": "data/reports/calibration/training_summary.json",
+      "contains": ["training rows", "features", "metrics", "artifact paths"],
+      "used_by": ["model limitation explanation", "interview explanation"]
+    },
+    {
+      "source_id": "formulas_and_data_points",
+      "type": "documentation",
+      "path": "FORMULAS_AND_DATA_POINTS.md",
+      "contains": ["human-readable formulas", "data points", "model explanations"],
+      "used_by": ["copilot retrieval", "interview preparation"]
+    },
+    {
+      "source_id": "synthetic_flow_calculation_guide",
+      "type": "documentation",
+      "path": "SYNTHETIC_FLOW_CALCULATION_GUIDE.md",
+      "contains": ["step-by-step synthetic example flow", "calculation explanations"],
+      "used_by": ["calculation trace answers", "interview preparation"]
+    },
+    {
+      "source_id": "calibration_final_guide",
+      "type": "documentation",
+      "path": "CALIBRATION_PHASES_FINAL_GUIDE.md",
+      "contains": ["free-source calibration implementation", "model artifacts", "validation notes"],
+      "used_by": ["model accuracy and realism explanation"]
+    }
+  ]
+}

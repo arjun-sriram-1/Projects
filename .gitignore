@@ -1,0 +1,56 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python caches
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+credit_env/
+
+# Logs
+*.log
+logs/
+
+# Local/generated data
+data/uploads/
+data/reports/
+data/local/
+data/raw/
+data/private/
+data/external/free_sources/sec_financials/raw_sec_quarterly_zips/
+data/processed/calibration/*.csv
+
+# Model and vector artifacts
+data/models/*.pkl
+data/models/*.joblib
+data/vector_store/*.faiss
+data/vector_store/*.pkl
+*.pkl
+*.joblib
+
+# Local databases
+*.db
+
+# Generated memos/reports
+credit_memo.pdf
+credit_memo.docx
+*.pdf
+*.docx
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
